@@ -1,0 +1,45 @@
+{
+  "name": "id-profanity-filter",
+  "version": "0.1.0",
+  "description": "Library filter kata kotor dalam Bahasa Indonesia",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "profanity",
+    "filter",
+    "indonesia",
+    "indonesian",
+    "kata-kotor",
+    "sensor"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SideeID/id-profanity-filter.git"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "rollup": "^4.39.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "ts-jest": "^29.3.1",
+    "typescript": "^5.8.3"
+  }
+}
