@@ -1,12 +1,14 @@
-import { FilterOptions, ProfanityCategory, Region } from "../types";
+import { FilterOptions, ProfanityCategory, Region } from '../types';
 
 export const DEFAULT_OPTIONS: FilterOptions = {
-  replaceWith: "*",
+  replaceWith: '*',
   fullWordCensor: true,
   detectLeetSpeak: true,
   checkSubstring: false,
   whitelist: [],
   severityThreshold: 0,
+  useLevenshtein: false,
+  maxLevenshteinDistance: 2,
 };
 
 export const FILTER_PRESETS = {
@@ -25,7 +27,7 @@ export const FILTER_PRESETS = {
   light: {
     ...DEFAULT_OPTIONS,
     severityThreshold: 0.7,
-    categories: ["sexual", "slur", "blasphemy"] as ProfanityCategory[],
+    categories: ['sexual', 'slur', 'blasphemy'] as ProfanityCategory[],
   },
 
   childSafe: {
@@ -40,57 +42,57 @@ export const FILTER_PRESETS = {
 export const CATEGORY_PRESETS = {
   sexual: {
     ...DEFAULT_OPTIONS,
-    categories: ["sexual"] as ProfanityCategory[],
+    categories: ['sexual'] as ProfanityCategory[],
   },
 
   insults: {
     ...DEFAULT_OPTIONS,
-    categories: ["insult"] as ProfanityCategory[],
+    categories: ['insult'] as ProfanityCategory[],
   },
 
   profanity: {
     ...DEFAULT_OPTIONS,
-    categories: ["profanity"] as ProfanityCategory[],
+    categories: ['profanity'] as ProfanityCategory[],
   },
 };
 
 export const REGION_PRESETS = {
   general: {
     ...DEFAULT_OPTIONS,
-    regions: ["general"] as Region[],
+    regions: ['general'] as Region[],
   },
 
   jawa: {
     ...DEFAULT_OPTIONS,
-    regions: ["jawa"] as Region[],
+    regions: ['jawa'] as Region[],
   },
 
   sunda: {
     ...DEFAULT_OPTIONS,
-    regions: ["sunda"] as Region[],
+    regions: ['sunda'] as Region[],
   },
 
   betawi: {
     ...DEFAULT_OPTIONS,
-    regions: ["betawi"] as Region[],
+    regions: ['betawi'] as Region[],
   },
 
   batak: {
     ...DEFAULT_OPTIONS,
-    regions: ["batak"] as Region[],
+    regions: ['batak'] as Region[],
   },
 };
 
 export const REPLACEMENT_CHARS = {
-  asterisk: "*",
-  hash: "#",
-  dollar: "$",
-  at: "@",
-  percent: "%",
-  underscore: "_",
-  dash: "-",
-  dot: ".",
-  grawlix: "#@$%&!",
+  asterisk: '*',
+  hash: '#',
+  dollar: '$',
+  at: '@',
+  percent: '%',
+  underscore: '_',
+  dash: '-',
+  dot: '.',
+  grawlix: '#@$%&!',
 };
 
 /**
@@ -145,7 +147,7 @@ export function getPresetOptions(
  * @returns Karakter pengganti
  */
 export function getReplacementChar(
-  type: keyof typeof REPLACEMENT_CHARS = "asterisk",
+  type: keyof typeof REPLACEMENT_CHARS = 'asterisk',
 ): string {
   return REPLACEMENT_CHARS[type] || REPLACEMENT_CHARS.asterisk;
 }
@@ -167,7 +169,7 @@ export function getRandomGrawlix(): string {
  * @returns String pengganti
  */
 export function makeRandomGrawlixString(length: number): string {
-  let result = "";
+  let result = '';
   const grawlix = REPLACEMENT_CHARS.grawlix;
 
   for (let i = 0; i < length; i++) {
