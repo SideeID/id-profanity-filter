@@ -28,6 +28,11 @@ export function filter(
     useRandomGrawlix = false,
     keepFirstAndLast = false,
     indonesianVariation = false,
+    detectSplit = false,
+    detectSimilarity = false,
+    useLevenshtein = false,
+    maxLevenshteinDistance = 2,
+    similarityThreshold = 0.8,
   } = { ...DEFAULT_OPTIONS, ...options };
 
   const matches = findProfanity(text, {
@@ -36,7 +41,15 @@ export function filter(
     whitelist,
     checkSubstring,
     indonesianVariation,
+    detectSplit,
+    detectSimilarity,
+    useLevenshtein,
+    maxLevenshteinDistance,
+    similarityThreshold,
   });
+
+  const actualMatches: Map<string, string[]> =
+    (findProfanity as any).lastActualMatches || new Map();
 
   const matchDetails = findProfanityWithMetadata(text, options);
 
@@ -66,48 +79,175 @@ export function filter(
           )),
     );
 
-    const regex = createWordRegex(word, {
-      wholeWord: true,
-      caseSensitive: false,
-      leetSpeak: false,
-      detectSplit: false,
-      indonesianVariation: false,
-    });
+    const variants = actualMatches.get(word.toLowerCase()) || [];
+    variants.push(word);
 
-    let match;
-    const textToSearch = filteredText;
+    const uniqueVariants = [...new Set(variants)];
 
-    regex.lastIndex = 0;
+    uniqueVariants.forEach((variant) => {
+      const regex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, "gi");
 
-    while ((match = regex.exec(textToSearch)) !== null) {
-      const originalWord = match[0];
+      let match;
+      while ((match = regex.exec(filteredText)) !== null) {
+        const originalWord = match[0];
 
-      if (whitelist.includes(originalWord.toLowerCase())) continue;
+        if (whitelist.includes(originalWord.toLowerCase())) continue;
 
-      let censoredWord;
-      if (useRandomGrawlix) {
-        censoredWord = makeRandomGrawlixString(originalWord.length);
-      } else {
-        censoredWord = censorWord(
-          originalWord,
-          replaceWith,
-          !fullWordCensor && keepFirstAndLast,
+        let censoredWord;
+        if (useRandomGrawlix) {
+          censoredWord = makeRandomGrawlixString(originalWord.length);
+        } else {
+          censoredWord = censorWord(
+            originalWord,
+            replaceWith,
+            !fullWordCensor && keepFirstAndLast,
+          );
+        }
+
+        replacements.push({
+          original: originalWord,
+          censored: censoredWord,
+          metadata,
+        });
+
+        filteredText = filteredText.replace(
+          new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, "g"),
+          censoredWord,
         );
       }
+    });
 
-      replacements.push({
-        original: originalWord,
-        censored: censoredWord,
-        metadata,
-      });
+    if (detectSplit || detectLeetSpeak) {
+      if (detectLeetSpeak) {
+        const leetRegex = createWordRegex(word, {
+          wholeWord: true,
+          caseSensitive: false,
+          leetSpeak: true,
+          detectSplit: false,
+          indonesianVariation: false,
+        });
 
-      const replaceRegex = new RegExp(
-        `\\b${escapeRegExp(originalWord)}\\b`,
-        "g",
-      );
-      filteredText = filteredText.replace(replaceRegex, censoredWord);
+        let match;
+        while ((match = leetRegex.exec(filteredText)) !== null) {
+          const originalWord = match[0];
+
+          if (whitelist.includes(originalWord.toLowerCase())) continue;
+
+          let censoredWord;
+          if (useRandomGrawlix) {
+            censoredWord = makeRandomGrawlixString(originalWord.length);
+          } else {
+            censoredWord = censorWord(
+              originalWord,
+              replaceWith,
+              !fullWordCensor && keepFirstAndLast,
+            );
+          }
+
+          replacements.push({
+            original: originalWord,
+            censored: censoredWord,
+            metadata,
+          });
+
+          filteredText = filteredText.replace(
+            new RegExp(escapeRegExp(originalWord), "g"),
+            censoredWord,
+          );
+        }
+      }
+
+      if (detectSplit) {
+        const splitRegex = createWordRegex(word, {
+          wholeWord: false,
+          caseSensitive: false,
+          leetSpeak: false,
+          detectSplit: true,
+          indonesianVariation: false,
+        });
+
+        let match;
+        while ((match = splitRegex.exec(filteredText)) !== null) {
+          const originalWord = match[0];
+
+          if (whitelist.includes(originalWord.toLowerCase())) continue;
+
+          let censoredWord;
+          if (useRandomGrawlix) {
+            censoredWord = makeRandomGrawlixString(originalWord.length);
+          } else {
+            censoredWord = censorWord(
+              originalWord,
+              replaceWith,
+              !fullWordCensor && keepFirstAndLast,
+            );
+          }
+
+          replacements.push({
+            original: originalWord,
+            censored: censoredWord,
+            metadata,
+          });
+
+          filteredText = filteredText.replace(
+            new RegExp(escapeRegExp(originalWord), "g"),
+            censoredWord,
+          );
+        }
+      }
     }
   });
+
+  if (detectSimilarity && useLevenshtein) {
+    matches.forEach((word) => {
+      const metadata = matchDetails.find(
+        (m) =>
+          m.word.toLowerCase() === word.toLowerCase() ||
+          (m.aliases &&
+            m.aliases.some(
+              (alias) => alias.toLowerCase() === word.toLowerCase(),
+            )),
+      );
+
+      const variants = actualMatches.get(word.toLowerCase()) || [];
+
+      variants.forEach((variant) => {
+        const exactVariantRegex = new RegExp(
+          `\\b${escapeRegExp(variant)}\\b`,
+          "gi",
+        );
+
+        let match;
+        while ((match = exactVariantRegex.exec(filteredText)) !== null) {
+          const originalWord = match[0];
+
+          if (whitelist.includes(originalWord.toLowerCase())) continue;
+
+          let censoredWord;
+          if (useRandomGrawlix) {
+            censoredWord = makeRandomGrawlixString(originalWord.length);
+          } else {
+            censoredWord = censorWord(
+              originalWord,
+              replaceWith,
+              !fullWordCensor && keepFirstAndLast,
+            );
+          }
+
+          replacements.push({
+            original: originalWord,
+            censored: censoredWord,
+            metadata,
+          });
+
+          filteredText = filteredText.replace(
+            new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, "g"),
+            censoredWord,
+          );
+        }
+      });
+    });
+  }
 
   return {
     filtered: filteredText,
