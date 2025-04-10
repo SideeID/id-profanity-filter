@@ -22,7 +22,7 @@ npm install
 ### 3. Buat Branch Baru
 
 ```bash
-git checkout -b add-kata-kotor-daerah
+git switch -c add-kata-kotor-daerah
 ```
 
 ## Struktur Kata Kotor
