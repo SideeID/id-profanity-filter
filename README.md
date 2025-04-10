@@ -13,6 +13,7 @@ Library JavaScript/TypeScript untuk mendeteksi, menyensor, dan menganalisis kata
 - 🔒 **Penyensoran** - Menyensor kata-kata kotor dengan berbagai opsi kustomisasi
 - 🗺️ **Dukungan Bahasa Daerah** - Mencakup kata-kata dari berbagai daerah di Indonesia (Jawa, Sunda, Batak, dll)
 - 🧠 **Deteksi Cerdas** - Mendeteksi variasi ejaan, kata terpisah, dan kesamaan kata
+- 🔠 **Deteksi Levenshtein** - Mendeteksi kata kotor yang dimodifikasi dengan typo atau sengaja disamarkan
 - 🛡️ **Preset** - Preset filter siap pakai untuk berbagai kebutuhan
 - 🔧 **Kustomisasi** - Opsi untuk menambahkan whitelist dan daftar kata kustom
 
@@ -182,11 +183,20 @@ Mengaktifkan deteksi variasi ejaan Bahasa Indonesia.
 
 Mengaktifkan deteksi kata yang dipisah.
 
-##### `enableSimilarityDetection(threshold: number = 0.8)`
+##### `enableSimilarityDetection(threshold: number = 0.8, useLevenshtein: boolean = false, maxLevenshteinDistance: number = 2)`
 
 Mengaktifkan deteksi berdasarkan kesamaan kata.
 
 - **threshold**: Ambang batas kesamaan (0-1, default: 0.8)
+- **useLevenshtein**: Gunakan algoritma Levenshtein untuk deteksi (default: false)
+- **maxLevenshteinDistance**: Jarak edit maksimum yang diizinkan (default: 2)
+
+##### `enableLevenshteinDetection(threshold: number = 0.8, maxDistance: number = 2)`
+
+Mengaktifkan deteksi berbasis jarak Levenshtein.
+
+- **threshold**: Ambang batas kesamaan (0-1, default: 0.8)
+- **maxDistance**: Jarak edit maksimum yang diizinkan (default: 2)
 
 ### Opsi Filter
 
@@ -210,6 +220,8 @@ interface FilterOptions {
   detectSimilarity?: boolean; // Deteksi kata berdasarkan kesamaan
   similarityThreshold?: number; // Ambang batas kesamaan (0-1)
   detectSplit?: boolean; // Deteksi kata yang dipisah (a-n-j-i-n-g)
+  useLevenshtein?: boolean; // Gunakan algoritma Levenshtein untuk deteksi kesamaan
+  maxLevenshteinDistance?: number; // Jarak edit maksimum untuk deteksi Levenshtein
 }
 ```
 
@@ -258,6 +270,8 @@ const filter = new IDProfanityFilter({
   detectSimilarity: true, // Deteksi kata yang mirip
   similarityThreshold: 0.8, // Ambang batas kesamaan
   detectSplit: true, // Deteksi kata yang dipisah
+  useLevenshtein: true, // Gunakan algoritma Levenshtein
+  maxLevenshteinDistance: 2, // Jarak Levenshtein maksimum
 });
 ```
 
@@ -300,10 +314,10 @@ console.log(hasil2.filtered);
 // Output: "Dia sangat ***** dan ****** dengan temannya"
 ```
 
-### Deteksi Berdasarkan Kesamaan
+### Deteksi Berdasarkan Kesamaan (Similarity Detection)
 
 ```typescript
-// Aktifkan deteksi kesamaan
+// Aktifkan deteksi kesamaan standar
 const filter = new IDProfanityFilter();
 filter.enableSimilarityDetection(0.75); // Set threshold kesamaan ke 0.75
 
@@ -321,6 +335,34 @@ console.log(analisis.similarWords);
 const hasil = filter.filter(teks);
 console.log(hasil.filtered);
 // Output: "Dia benar-benar ****** dan *******!"
+```
+
+### Deteksi dengan Algoritma Levenshtein Distance
+
+```typescript
+// Aktifkan deteksi menggunakan algoritma Levenshtein Distance
+const filter = new IDProfanityFilter();
+filter.enableLevenshteinDetection(0.85, 2);
+// Threshold 0.85, maksimal 2 karakter berbeda
+
+const teks = 'Dia benar-benar konntol dan anjiing sekali!';
+const hasil = filter.filter(teks);
+
+console.log(hasil.filtered);
+// Output: "Dia benar-benar ******* dan ****** sekali!"
+
+// Atau menggunakan opsi langsung:
+const filterCustom = new IDProfanityFilter({
+  detectSimilarity: true,
+  useLevenshtein: true,
+  similarityThreshold: 0.85,
+  maxLevenshteinDistance: 2,
+});
+
+// Mendeteksi typo atau variasi disengaja
+const teksVariasi = 'kontool kamu kwontol anjiing';
+console.log(filterCustom.filter(teksVariasi).filtered);
+// Output: "******* kamu ******* ******"
 ```
 
 ### Variasi Sensor Kata
