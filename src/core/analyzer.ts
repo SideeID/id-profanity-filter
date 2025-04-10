@@ -4,14 +4,14 @@ import {
   ProfanityWord,
   ProfanityCategory,
   Region,
-} from '../types';
+} from "../types";
 import {
   findProfanity,
   findProfanityWithMetadata,
   findCategories,
   findRegions,
   calculateSeverity,
-} from './matcher';
+} from "./matcher";
 
 /**
  * Menganalisis teks untuk kata kotor
@@ -176,14 +176,14 @@ export function analyzeWithContext(
   for (const word of matches) {
     const regex = new RegExp(
       `((?:\\S+\\s+){0,${contextWindowSize}})(\\b${escapeRegExp(word)}\\b)((?:\\s+\\S+){0,${contextWindowSize}})`,
-      'gi',
+      "gi",
     );
 
     let match;
     while ((match = regex.exec(text)) !== null) {
-      const beforeContext = match[1] || '';
+      const beforeContext = match[1] || "";
       const wordMatch = match[2];
-      const afterContext = match[3] || '';
+      const afterContext = match[3] || "";
 
       result.push({
         word: wordMatch,
@@ -200,5 +200,5 @@ export function analyzeWithContext(
 }
 
 function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

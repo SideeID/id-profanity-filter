@@ -1,16 +1,16 @@
-export * from './types';
-export * from './core/matcher';
-export * from './core/filter';
-export * from './core/analyzer';
+export * from "./types";
+export * from "./core/matcher";
+export * from "./core/filter";
+export * from "./core/analyzer";
 
-import { filter, isProfane } from './core/filter';
+import { filter, isProfane } from "./core/filter";
 import {
   analyze,
   batchAnalyze,
   analyzeBySentence,
   analyzeWithContext,
-} from './core/analyzer';
-import { FilterOptions, FilterResult, AnalysisResult } from './types';
+} from "./core/analyzer";
+import { FilterOptions, FilterResult, AnalysisResult } from "./types";
 
 export class IDProfanityFilter {
   private options: FilterOptions;

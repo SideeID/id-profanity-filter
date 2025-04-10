@@ -1,32 +1,31 @@
 export type ProfanityCategory =
-  | 'sexual' // Kata-kata berbau seksual
-  | 'insult' // Kata-kata penghinaan
-  | 'profanity' // Umpatan umum
-  | 'slur' // Perkataan merendahkan berdasarkan identitas
-  | 'drugs' // Terkait narkoba
-  | 'disgusting' // Kata-kata menjijikkan
-  | 'blasphemy'; // Penistaan agama
-
+  | "sexual" // Kata-kata berbau seksual
+  | "insult" // Kata-kata penghinaan
+  | "profanity" // Umpatan umum
+  | "slur" // Perkataan merendahkan berdasarkan identitas
+  | "drugs" // Terkait narkoba
+  | "disgusting" // Kata-kata menjijikkan
+  | "blasphemy"; // Penistaan agama
 
 export type Region =
-  | 'general' // Umum di Indonesia
-  | 'jawa' 
-  | 'sunda' 
-  | 'betawi' 
-  | 'batak' 
-  | 'minang' 
-  | 'bali' 
-  | 'madura' 
-  | 'bugis' 
-  | 'aceh' 
-  | 'ambon' 
-  | 'papua' 
-  | 'manado' 
-  | 'banjar' 
-  | 'palembang' 
-  | 'lampung' 
-  | 'ntt' 
-  | 'ntb'; 
+  | "general" // Umum di Indonesia
+  | "jawa"
+  | "sunda"
+  | "betawi"
+  | "batak"
+  | "minang"
+  | "bali"
+  | "madura"
+  | "bugis"
+  | "aceh"
+  | "ambon"
+  | "papua"
+  | "manado"
+  | "banjar"
+  | "palembang"
+  | "lampung"
+  | "ntt"
+  | "ntb";
 
 /**
  * Definisi kata kotor

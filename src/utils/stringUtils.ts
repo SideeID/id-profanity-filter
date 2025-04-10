@@ -8,7 +8,7 @@
  */
 export function censorWord(
   word: string,
-  replaceChar: string = '*',
+  replaceChar: string = "*",
   keepFirstAndLast: boolean = false,
 ): string {
   if (word.length <= 2) {
@@ -31,9 +31,9 @@ export function censorWord(
 export function normalizeText(text: string): string {
   return text
     .toLowerCase()
-    .normalize('NFD') // Normalisasi Unicode
-    .replace(/[\u0300-\u036f]/g, '') // Hapus diacritic marks
-    .replace(/[^\w\s]/g, '') // Hapus karakter non-alphanumeric
+    .normalize("NFD") // Normalisasi Unicode
+    .replace(/[\u0300-\u036f]/g, "") // Hapus diacritic marks
+    .replace(/[^\w\s]/g, "") // Hapus karakter non-alphanumeric
     .trim(); // Hapus whitespace di awal dan akhir
 }
 
@@ -56,7 +56,7 @@ export function containsAnyWord(
     const normalizedWord = normalizeText(word);
     return checkSubstring
       ? normalizedText.includes(normalizedWord)
-      : new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, 'i').test(
+      : new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, "i").test(
           normalizedText,
         );
   });
@@ -78,7 +78,7 @@ export function containsEuphemism(text: string, wordList: string[]): boolean {
     const lastChar = word[word.length - 1];
     const pattern = new RegExp(
       `\\b${escapeRegExp(firstChar)}[*@#\\-_.!?\\s]{${word.length - 2}}${escapeRegExp(lastChar)}\\b`,
-      'i',
+      "i",
     );
 
     return pattern.test(text);
@@ -94,11 +94,120 @@ export function containsEuphemism(text: string, wordList: string[]): boolean {
  * @returns Boolean apakah teks mengandung upaya menghindari filter
  */
 export function detectSplitWords(text: string, wordList: string[]): boolean {
-  const compressedText = text.replace(/[\s\-_.!?*]/g, '').toLowerCase();
+  const compressedText = text.replace(/[\s\-_.!?*]/g, "").toLowerCase();
 
   return wordList.some((word) => compressedText.includes(normalizeText(word)));
 }
 
 export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Mengganti sebagian kata dengan masking
+ * (berguna untuk email, nomor telepon, dll)
+ *
+ * @param text Teks untuk dimasking
+ * @param visibleStart Jumlah karakter yang terlihat di awal
+ * @param visibleEnd Jumlah karakter yang terlihat di akhir
+ * @param maskChar Karakter masking
+ * @returns Teks yang telah dimasking
+ */
+export function maskText(
+  text: string,
+  visibleStart: number = 1,
+  visibleEnd: number = 1,
+  maskChar: string = "*",
+): string {
+  if (!text) return "";
+  if (text.length <= visibleStart + visibleEnd) return text;
+
+  const start = text.substring(0, visibleStart);
+  const middle = maskChar.repeat(text.length - visibleStart - visibleEnd);
+  const end = text.substring(text.length - visibleEnd);
+
+  return start + middle + end;
+}
+
+/**
+ * menguabh sting menjadi bentuk leet speak
+ * (untuk testing filter bypass)
+ *
+ * @param text Teks yang akan diubah
+ * @return Teks yang telah diubah ke leet speak
+ */
+export function toLeetSpeak(text: string): string {
+  const leetMap: Record<string, string[]> = {
+    a: ["4", "@"],
+    b: ["8", "6"],
+    c: ["<", "(", "{"],
+    e: ["3"],
+    g: ["9"],
+    i: ["1", "!"],
+    l: ["1", "|"],
+    o: ["0"],
+    s: ["5", "$"],
+    t: ["7", "+"],
+    z: ["2"],
+  };
+
+  return text
+    .split("")
+    .map((char) => {
+      const lowerChar = char.toLowerCase();
+      return leetMap[lowerChar] || char;
+    })
+    .join("");
+}
+
+/**
+ * memisahkan teks menajdi kelimat
+ *
+ * @param text Teks yang akan dipisahkan
+ * @return Array kalimat yang telah dipisahkan
+ */
+export function splitIntoSentences(text: string): string[] {
+  // split berdasarkan titik, seru, taya yagn diikuti spasi atau akhir string
+  return text
+    .split(/(?<=[.!?])\s+|(?<=[.!?])$/)
+    .filter((sentence) => sentence.trim().length > 0);
+}
+
+/**
+ * mengambil kata-kata di sekitar indeks tertentu
+ *
+ * @param text Teks yang akan diambil
+ * @param index Indeks dalam teks
+ * @param windowSize jumlah kata di sekitar indeks
+ * @return Kata-kata di sekitar indeks
+ */
+export function getContextAroundIndex(
+  text: string,
+  index: number,
+  windowSize: number = 5,
+): string {
+  if (!text || index < 0 || index >= text.length) return "";
+
+  const words = text.split(/\s+/);
+
+  let currentPosition = 0;
+  let targetWordIndex = -1;
+
+  for (let i = 0; i < words.length; i++) {
+    const wordLength = words[i].length;
+    if (index >= currentPosition && index < currentPosition + wordLength) {
+      targetWordIndex = i;
+      break;
+    }
+    // Tambahkan panjang kata dan spasi
+    currentPosition += wordLength + 1;
+  }
+
+  if (targetWordIndex === -1) return "";
+
+  // Ambil kata-kata di sekitar
+  const startIndex = Math.max(0, targetWordIndex - windowSize);
+  const endIndex = Math.min(words.length, targetWordIndex + windowSize + 1);
+
+  return words.slice(startIndex, endIndex).join(" ");
 }

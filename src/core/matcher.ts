@@ -3,9 +3,9 @@ import {
   ProfanityCategory,
   Region,
   FilterOptions,
-} from '../types';
+} from "../types";
 
-import { wordObjects, getWordsByFilter } from '../constants/wordList';
+import { wordObjects, getWordsByFilter } from "../constants/wordList";
 
 export function findProfanity(
   text: string,
@@ -55,7 +55,7 @@ export function findProfanity(
   wordsToCheck.forEach((word) => {
     const pattern = checkSubstring ? word : `\\b${escapeRegExp(word)}\\b`;
 
-    const regex = new RegExp(pattern, 'gi');
+    const regex = new RegExp(pattern, "gi");
 
     let match;
     while ((match = regex.exec(normalizedText)) !== null) {
@@ -70,7 +70,7 @@ export function findProfanity(
       const leetPattern = createLeetSpeakPattern(word);
       const leetRegex = new RegExp(
         checkSubstring ? leetPattern : `\\b${leetPattern}\\b`,
-        'gi',
+        "gi",
       );
 
       let match;
@@ -80,7 +80,7 @@ export function findProfanity(
 
       // cek karakter yang dipisah
       const evasionPattern = createEvasionPattern(word);
-      const evasionRegex = new RegExp(evasionPattern, 'gi');
+      const evasionRegex = new RegExp(evasionPattern, "gi");
       while ((match = evasionRegex.exec(text)) !== null) {
         matches.add(word.toLowerCase());
       }
@@ -99,8 +99,8 @@ export function findProfanity(
 function normalizeText(text: string): string {
   return text
     .toLowerCase()
-    .normalize('NFD') // Normalisasi Unicode
-    .replace(/[\u0300-\u036f]/g, '') // Hapus diacritic marks
+    .normalize("NFD") // Normalisasi Unicode
+    .replace(/[\u0300-\u036f]/g, "") // Hapus diacritic marks
     .trim();
 }
 
@@ -111,7 +111,7 @@ function normalizeText(text: string): string {
  * @returns String yang sudah di-escape
  */
 function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -122,32 +122,32 @@ function escapeRegExp(string: string): string {
  */
 function createLeetSpeakPattern(word: string): string {
   const leetMap: Record<string, string[]> = {
-    a: ['a', '4', '@'],
-    b: ['b', '8', '6'],
-    c: ['c', '<', '(', '{'],
-    e: ['e', '3'],
-    g: ['g', '9'],
-    i: ['i', '1', '!'],
-    l: ['l', '1', '|'],
-    o: ['o', '0'],
-    s: ['s', '5', '$'],
-    t: ['t', '7', '+'],
-    z: ['z', '2'],
+    a: ["a", "4", "@"],
+    b: ["b", "8", "6"],
+    c: ["c", "<", "(", "{"],
+    e: ["e", "3"],
+    g: ["g", "9"],
+    i: ["i", "1", "!"],
+    l: ["l", "1", "|"],
+    o: ["o", "0"],
+    s: ["s", "5", "$"],
+    t: ["t", "7", "+"],
+    z: ["z", "2"],
   };
 
   return word
-    .split('')
+    .split("")
     .map((char) => {
       const lowerChar = char.toLowerCase();
       const replacements = leetMap[lowerChar];
 
       if (replacements && replacements.length > 0) {
-        return `[${replacements.join('')}]`;
+        return `[${replacements.join("")}]`;
       } else {
         return escapeRegExp(char);
       }
     })
-    .join('');
+    .join("");
 }
 
 /**
@@ -158,9 +158,9 @@ function createLeetSpeakPattern(word: string): string {
  */
 function createEvasionPattern(word: string): string {
   return word
-    .split('')
+    .split("")
     .map((char) => escapeRegExp(char))
-    .join('[\\s\\-._*+]?');
+    .join("[\\s\\-._*+]?");
 }
 
 /**

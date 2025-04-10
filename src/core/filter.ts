@@ -1,5 +1,5 @@
-import { FilterOptions, FilterResult, ProfanityWord } from '../types';
-import { findProfanity, findProfanityWithMetadata } from './matcher';
+import { FilterOptions, FilterResult, ProfanityWord } from "../types";
+import { findProfanity, findProfanityWithMetadata } from "./matcher";
 
 /**
  * Menyensor kata kotor dalam teks
@@ -13,7 +13,7 @@ export function filter(
   options: FilterOptions = {},
 ): FilterResult {
   const {
-    replaceWith = '*',
+    replaceWith = "*",
     fullWordCensor = true,
     detectLeetSpeak = true,
     whitelist = [],
@@ -55,7 +55,7 @@ export function filter(
           )),
     );
 
-    const regex = new RegExp(`\\b${escapeRegExp(word)}\\b`, 'gi');
+    const regex = new RegExp(`\\b${escapeRegExp(word)}\\b`, "gi");
 
     let match;
     while ((match = regex.exec(filteredText)) !== null) {
@@ -75,7 +75,7 @@ export function filter(
 
       const replaceRegex = new RegExp(
         `\\b${escapeRegExp(originalWord)}\\b`,
-        'g',
+        "g",
       );
       filteredText = filteredText.replace(replaceRegex, censoredWord);
     }
@@ -110,7 +110,7 @@ export function isProfane(text: string, options: FilterOptions = {}): boolean {
  * @returns String yang telah di-escape
  */
 function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
