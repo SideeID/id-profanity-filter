@@ -92,6 +92,48 @@ export function findMostSimilar(
 }
 
 /**
+ * Mencari string yang paling mirip dari array menggunakan Levenshtein distance
+ *
+ * @param target String target
+ * @param candidates Array string kandidat
+ * @param threshold Minimum kesamaan yang diterima (0-1)
+ * @param maxDistance Jarak Levenshtein maksimal yang diterima (default: 3)
+ * @returns String yang paling mirip atau null jika tidak ada yang di atas threshold
+ */
+export function findMostSimilarWithLevenshtein(
+  target: string,
+  candidates: string[],
+  threshold: number = 0.7,
+  maxDistance: number = 3,
+): string | null {
+  if (!candidates.length) return null;
+
+  let maxSimilarity = 0;
+  let minDistance = Infinity;
+  let mostSimilar: string | null = null;
+
+  for (const candidate of candidates) {
+    if (Math.abs(target.length - candidate.length) > maxDistance) continue;
+
+    const distance = levenshteinDistance(target, candidate);
+    const similarity = stringSimilarity(target, candidate);
+
+    if (
+      (similarity > maxSimilarity && similarity >= threshold) ||
+      (similarity >= threshold && distance < minDistance)
+    ) {
+      maxSimilarity = similarity;
+      minDistance = distance;
+      mostSimilar = candidate;
+
+      if (distance <= 1 || similarity > 0.95) break;
+    }
+  }
+
+  return mostSimilar;
+}
+
+/**
  * Cek apakah string mungkin merupakan variasi dari kata kotor
  * menggunakan kesamaan string
  *
@@ -170,11 +212,9 @@ export function findPossibleProfanityBySimiliarity(
   const result: Array<{ word: string; original: string; similarity: number }> =
     [];
 
-  // Pisahkan teks menjadi kata-kata
   const words = text.toLowerCase().split(/\s+/);
 
   for (const word of words) {
-    // Lewati kata-kata yang terlalu pendek
     if (word.length < 3) continue;
 
     for (const profanity of profanityWords) {
@@ -187,6 +227,61 @@ export function findPossibleProfanityBySimiliarity(
           similarity,
         });
         break;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Cari kata-kata kotor yang mungkin dari teks menggunakan Levenshtein distance
+ *
+ * @param text Teks yang akan diperiksa
+ * @param profanityWords Daftar kata kotor
+ * @param threshold Batas minimum kesamaan (default: 0.8)
+ * @param maxDistance Jarak Levenshtein maksimal (default: 2)
+ * @returns Array kata yang mungkin merupakan kata kotor
+ */
+export function findProfanityByLevenshteinDistance(
+  text: string,
+  profanityWords: string[],
+  threshold: number = 0.8,
+  maxDistance: number = 2,
+): Array<{
+  word: string;
+  original: string;
+  similarity: number;
+  distance: number;
+}> {
+  const result: Array<{
+    word: string;
+    original: string;
+    similarity: number;
+    distance: number;
+  }> = [];
+
+  const words = text.toLowerCase().split(/\s+/);
+
+  for (const word of words) {
+    if (word.length < 3) continue;
+
+    for (const profanity of profanityWords) {
+      if (Math.abs(word.length - profanity.length) > maxDistance) continue;
+
+      const distance = levenshteinDistance(word, profanity);
+      if (distance <= maxDistance) {
+        const similarity = stringSimilarity(word, profanity);
+
+        if (similarity >= threshold) {
+          result.push({
+            word,
+            original: profanity,
+            similarity,
+            distance,
+          });
+          break;
+        }
       }
     }
   }
