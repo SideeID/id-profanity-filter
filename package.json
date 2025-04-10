@@ -1,5 +1,5 @@
 {
-  "name": "id-profanity-filter",
+  "name": "@sideid/id-profanity-filter",
   "version": "0.1.0",
   "description": "Library filter kata kotor dalam Bahasa Indonesia",
   "main": "dist/index.js",
@@ -19,12 +19,16 @@
     "kata-kotor",
     "sensor"
   ],
-  "author": "",
+  "author": "SideID <sandipratama164026@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SideeID/id-profanity-filter.git"
   },
+  "bugs": {
+    "url": "https://github.com/SideeID/id-profanity-filter/issues"
+  },
+  "homepage": "https://github.com/SideeID/id-profanity-filter#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
