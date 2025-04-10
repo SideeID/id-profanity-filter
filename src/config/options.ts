@@ -1,4 +1,3 @@
-import sexual from "../constants/categories/sexual";
 import { FilterOptions, ProfanityCategory, Region } from "../types";
 
 export const DEFAULT_OPTIONS: FilterOptions = {
