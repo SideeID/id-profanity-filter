@@ -1,8 +1,8 @@
-import { FilterOptions, FilterResult, ProfanityWord } from '../types';
-import { findProfanity, findProfanityWithMetadata } from './matcher';
-import { censorWord, escapeRegExp } from '../utils/stringUtils';
-import { createWordRegex } from '../utils/regexUtils';
-import { DEFAULT_OPTIONS, makeRandomGrawlixString } from '../config/options';
+import { FilterOptions, FilterResult, ProfanityWord } from "../types";
+import { findProfanity, findProfanityWithMetadata } from "./matcher";
+import { censorWord, escapeRegExp } from "../utils/stringUtils";
+import { createWordRegex } from "../utils/regexUtils";
+import { DEFAULT_OPTIONS, makeRandomGrawlixString } from "../config/options";
 
 interface FindProfanityFunction {
   (text: string, options?: FilterOptions): string[];
@@ -21,7 +21,7 @@ export function filter(
   options: FilterOptions = {},
 ): FilterResult {
   const {
-    replaceWith = '*',
+    replaceWith = "*",
     fullWordCensor = true,
     detectLeetSpeak = true,
     whitelist = [],
@@ -86,7 +86,7 @@ export function filter(
     const uniqueVariants = [...new Set(variants)];
 
     uniqueVariants.forEach((variant) => {
-      const regex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, 'gi');
+      const regex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, "gi");
 
       let match;
       while ((match = regex.exec(filteredText)) !== null) {
@@ -112,7 +112,7 @@ export function filter(
         });
 
         filteredText = filteredText.replace(
-          new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, 'g'),
+          new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, "g"),
           censoredWord,
         );
       }
@@ -152,7 +152,7 @@ export function filter(
           });
 
           filteredText = filteredText.replace(
-            new RegExp(escapeRegExp(originalWord), 'g'),
+            new RegExp(escapeRegExp(originalWord), "g"),
             censoredWord,
           );
         }
@@ -191,7 +191,7 @@ export function filter(
           });
 
           filteredText = filteredText.replace(
-            new RegExp(escapeRegExp(originalWord), 'g'),
+            new RegExp(escapeRegExp(originalWord), "g"),
             censoredWord,
           );
         }
@@ -215,7 +215,7 @@ export function filter(
       variants.forEach((variant) => {
         const exactVariantRegex = new RegExp(
           `\\b${escapeRegExp(variant)}\\b`,
-          'gi',
+          "gi",
         );
 
         let match;
@@ -242,7 +242,7 @@ export function filter(
           });
 
           filteredText = filteredText.replace(
-            new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, 'g'),
+            new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, "g"),
             censoredWord,
           );
         }

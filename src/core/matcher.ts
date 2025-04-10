@@ -3,16 +3,16 @@ import {
   ProfanityCategory,
   Region,
   FilterOptions,
-} from '../types';
+} from "../types";
 
-import { wordObjects } from '../constants/wordList';
-import { normalizeText } from '../utils/stringUtils';
-import { createWordRegex } from '../utils/regexUtils';
+import { wordObjects } from "../constants/wordList";
+import { normalizeText } from "../utils/stringUtils";
+import { createWordRegex } from "../utils/regexUtils";
 import {
   findPossibleProfanityBySimiliarity,
   findProfanityByLevenshteinDistance,
-} from '../utils/similarityUtils';
-import { DEFAULT_OPTIONS } from '../config/options';
+} from "../utils/similarityUtils";
+import { DEFAULT_OPTIONS } from "../config/options";
 
 interface FindProfanityFunction {
   (text: string, options?: FilterOptions): string[];

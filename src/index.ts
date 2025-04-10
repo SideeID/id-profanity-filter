@@ -1,27 +1,27 @@
-export * from './types';
-export * from './core/matcher';
-export * from './core/filter';
-export * from './core/analyzer';
-export * from './utils/stringUtils';
-export * from './utils/regexUtils';
-export * from './utils/similarityUtils';
-export * from './config/options';
+export * from "./types";
+export * from "./core/matcher";
+export * from "./core/filter";
+export * from "./core/analyzer";
+export * from "./utils/stringUtils";
+export * from "./utils/regexUtils";
+export * from "./utils/similarityUtils";
+export * from "./config/options";
 
-import { filter, isProfane } from './core/filter';
+import { filter, isProfane } from "./core/filter";
 import {
   analyze,
   batchAnalyze,
   analyzeBySentence,
   analyzeWithContext,
-} from './core/analyzer';
-import { FilterOptions, FilterResult, AnalysisResult } from './types';
+} from "./core/analyzer";
+import { FilterOptions, FilterResult, AnalysisResult } from "./types";
 import {
   DEFAULT_OPTIONS,
   FILTER_PRESETS,
   CATEGORY_PRESETS,
   REGION_PRESETS,
   getPresetOptions,
-} from './config/options';
+} from "./config/options";
 
 export class IDProfanityFilter {
   private options: FilterOptions;
