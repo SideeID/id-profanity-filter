@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rollup -c",
     "test": "jest",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint --ext .ts src/",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [
