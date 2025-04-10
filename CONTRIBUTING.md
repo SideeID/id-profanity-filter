@@ -9,7 +9,7 @@ Terima kasih telah mempertimbangkan untuk berkontribusi pada proyek ID-Profanity
 - Fork repositori ini ke akun GitHub Anda
 - Clone repositori fork Anda ke komputer lokal:
   ```bash
-  git clone https://github.com/SideeID/id-profanity-filter.git
+  git clone https://github.com/username/id-profanity-filter.git
   cd id-profanity-filter
   ```
 
