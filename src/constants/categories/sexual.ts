@@ -9,7 +9,6 @@ export const sexual: ProfanityWord[] = [
   ...jawa.filter((word) => word.category === "sexual"),
   ...sunda.filter((word) => word.category === "sexual"),
   ...betawi.filter((word) => word.category === "sexual"),
-
   {
     word: "bokep",
     category: "sexual",
