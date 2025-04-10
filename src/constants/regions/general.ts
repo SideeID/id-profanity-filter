@@ -95,8 +95,16 @@ export const general: ProfanityWord[] = [
     context:
       'Hinaan untuk menyebut orang yang dianggap jahat atau tidak bermoral',
   },
+  {
+    word: 'bacot',
+    category: 'insult',
+    region: 'general',
+    severity: 0.5,
+    aliases: ['bcot', 'bacot2'],
+    description: 'Kata yang mengacu pada orang yang banyak bicara',
+    context: 'Hinaan untuk menyebut orang yang banyak bicara atau cerewet',
+  },
 ];
-
 
 export const generalWords = general.map((item) => item.word);
 
