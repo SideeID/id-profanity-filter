@@ -1,5 +1,12 @@
 import { FilterOptions, FilterResult, ProfanityWord } from "../types";
 import { findProfanity, findProfanityWithMetadata } from "./matcher";
+import { censorWord, escapeRegExp, normalizeText } from "../utils/stringUtils";
+import { createWordRegex } from "../utils/regexUtils";
+import {
+  DEFAULT_OPTIONS,
+  makeRandomGrawlixString,
+  getRandomGrawlix,
+} from "../config/options";
 
 /**
  * Menyensor kata kotor dalam teks
@@ -18,13 +25,17 @@ export function filter(
     detectLeetSpeak = true,
     whitelist = [],
     checkSubstring = false,
-  } = options;
+    useRandomGrawlix = false,
+    keepFirstAndLast = false,
+    indonesianVariation = false,
+  } = { ...DEFAULT_OPTIONS, ...options };
 
   const matches = findProfanity(text, {
     ...options,
     detectLeetSpeak,
     whitelist,
     checkSubstring,
+    indonesianVariation,
   });
 
   const matchDetails = findProfanityWithMetadata(text, options);
@@ -55,17 +66,34 @@ export function filter(
           )),
     );
 
-    const regex = new RegExp(`\\b${escapeRegExp(word)}\\b`, "gi");
+    const regex = createWordRegex(word, {
+      wholeWord: true,
+      caseSensitive: false,
+      leetSpeak: false,
+      detectSplit: false,
+      indonesianVariation: false,
+    });
 
     let match;
-    while ((match = regex.exec(filteredText)) !== null) {
+    const textToSearch = filteredText;
+
+    regex.lastIndex = 0;
+
+    while ((match = regex.exec(textToSearch)) !== null) {
       const originalWord = match[0];
 
       if (whitelist.includes(originalWord.toLowerCase())) continue;
 
-      const censoredWord = fullWordCensor
-        ? replaceWith.repeat(originalWord.length)
-        : censorPartialWord(originalWord, replaceWith);
+      let censoredWord;
+      if (useRandomGrawlix) {
+        censoredWord = makeRandomGrawlixString(originalWord.length);
+      } else {
+        censoredWord = censorWord(
+          originalWord,
+          replaceWith,
+          !fullWordCensor && keepFirstAndLast,
+        );
+      }
 
       replacements.push({
         original: originalWord,
@@ -80,9 +108,6 @@ export function filter(
       filteredText = filteredText.replace(replaceRegex, censoredWord);
     }
   });
-
-  // if (detectLeetSpeak) {
-  // }
 
   return {
     filtered: filteredText,
@@ -101,29 +126,4 @@ export function filter(
 export function isProfane(text: string, options: FilterOptions = {}): boolean {
   const matches = findProfanity(text, options);
   return matches.length > 0;
-}
-
-/**
- * Escape karakter khusus regex
- *
- * @param string String untuk di-escape
- * @returns String yang telah di-escape
- */
-function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Menyensor sebagian kata
- * @param word Kata yang akan disensor
- * @param replaceChar Karakter pengganti
- * @returns Kata yang sudah disensor sebagian
- */
-function censorPartialWord(word: string, replaceChar: string): string {
-  if (word.length <= 2) {
-    return replaceChar.repeat(word.length);
-  }
-
-  // Simpan huruf pertama dan terakhir, sensor yang lain
-  return word[0] + replaceChar.repeat(word.length - 2) + word[word.length - 1];
 }
