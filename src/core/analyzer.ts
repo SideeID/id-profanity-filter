@@ -1,26 +1,20 @@
 import {
   FilterOptions,
   AnalysisResult,
-  ProfanityWord,
   ProfanityCategory,
   Region,
-} from "../types";
+} from '../types';
 import {
   findProfanity,
   findProfanityWithMetadata,
   findCategories,
   findRegions,
   calculateSeverity,
-} from "./matcher";
-import {
-  normalizeText,
-  escapeRegExp,
-  splitIntoSentences,
-  getContextAroundIndex,
-} from "../utils/stringUtils";
-import { findPossibleProfanityBySimiliarity } from "../utils/similarityUtils";
-import { createContextRegex } from "../utils/regexUtils";
-import { DEFAULT_OPTIONS } from "../config/options";
+} from './matcher';
+import { splitIntoSentences } from '../utils/stringUtils';
+import { findPossibleProfanityBySimiliarity } from '../utils/similarityUtils';
+import { createContextRegex } from '../utils/regexUtils';
+import { DEFAULT_OPTIONS } from '../config/options';
 
 /**
  * Menganalisis teks untuk kata kotor
@@ -206,9 +200,9 @@ export function analyzeWithContext(
 
     let match;
     while ((match = regex.exec(text)) !== null) {
-      const beforeContext = match[1] || "";
+      const beforeContext = match[1] || '';
       const wordMatch = match[2];
-      const afterContext = match[3] || "";
+      const afterContext = match[3] || '';
 
       result.push({
         word: wordMatch,
