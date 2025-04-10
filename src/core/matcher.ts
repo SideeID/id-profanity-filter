@@ -5,24 +5,19 @@ import {
   FilterOptions,
 } from "../types";
 
-import { wordObjects, getWordsByFilter } from "../constants/wordList";
-import {
-  normalizeText,
-  escapeRegExp,
-  containsAnyWord,
-  detectSplitWords,
-} from "../utils/stringUtils";
-import {
-  createWordRegex,
-  addLeetSpeakVariations,
-  addIndonesianVariations,
-  addSplitVariations,
-} from "../utils/regexUtils";
+import { wordObjects } from "../constants/wordList";
+import { normalizeText } from "../utils/stringUtils";
+import { createWordRegex } from "../utils/regexUtils";
 import {
   findPossibleProfanityBySimiliarity,
-  stringSimilarity,
+  findProfanityByLevenshteinDistance,
 } from "../utils/similarityUtils";
 import { DEFAULT_OPTIONS } from "../config/options";
+
+interface FindProfanityFunction {
+  (text: string, options?: FilterOptions): string[];
+  lastActualMatches?: Map<string, string[]>;
+}
 
 export function findProfanity(
   text: string,
@@ -40,38 +35,55 @@ export function findProfanity(
     detectSimilarity = false,
     similarityThreshold = 0.8,
     detectSplit = false,
+    useLevenshtein = false,
+    maxLevenshteinDistance = 2,
   } = { ...DEFAULT_OPTIONS, ...options };
 
   const normalizedText = normalizeText(text);
 
-  let wordsToCheck: string[] = wordList.length > 0 ? wordList : [];
+  let baseWordsToCheck: string[] = wordList.length > 0 ? wordList : [];
 
-  if (wordsToCheck.length === 0) {
-    if (categories || regions || severityThreshold > 0) {
-      wordsToCheck = wordObjects
-        .filter((word) => {
-          const matchCategory = categories
-            ? categories.includes(word.category)
-            : true;
-          const matchRegion = regions ? regions.includes(word.region) : true;
-          const matchSeverity = word.severity >= severityThreshold;
-          return matchCategory && matchRegion && matchSeverity;
-        })
-        .map((word) => word.word);
-    } else {
-      wordsToCheck = wordObjects.map((word) => word.word);
-    }
+  if (baseWordsToCheck.length === 0) {
+    const filteredWords = wordObjects.filter((word) => {
+      const matchCategory = categories
+        ? categories.includes(word.category)
+        : true;
+      const matchRegion = regions ? regions.includes(word.region) : true;
+      const matchSeverity = word.severity >= severityThreshold;
+      return matchCategory && matchRegion && matchSeverity;
+    });
+
+    baseWordsToCheck = filteredWords.map((word) => word.word);
   }
 
-  wordsToCheck = wordsToCheck.filter(
-    (word) => !whitelist.includes(word.toLocaleLowerCase()),
-  );
+  const aliasMap = new Map<string, string>();
+  wordObjects.forEach((wordObj) => {
+    if (wordObj.aliases && wordObj.aliases.length > 0) {
+      const matchCategory = categories
+        ? categories.includes(wordObj.category)
+        : true;
+      const matchRegion = regions ? regions.includes(wordObj.region) : true;
+      const matchSeverity = wordObj.severity >= severityThreshold;
+
+      if (matchCategory && matchRegion && matchSeverity) {
+        wordObj.aliases.forEach((alias) => {
+          aliasMap.set(alias.toLowerCase(), wordObj.word.toLowerCase());
+        });
+      }
+    }
+  });
+
+  const wordsToCheck = [
+    ...baseWordsToCheck,
+    ...Array.from(aliasMap.keys()),
+  ].filter((word) => !whitelist.includes(word.toLowerCase()));
 
   if (wordsToCheck.length === 0) {
     return [];
   }
 
   const matches = new Set<string>();
+  const actualMatches = new Map<string, string[]>();
 
   wordsToCheck.forEach((word) => {
     const regex = createWordRegex(word, {
@@ -84,7 +96,14 @@ export function findProfanity(
 
     let match;
     while ((match = regex.exec(normalizedText)) !== null) {
-      matches.add(word.toLowerCase());
+      const originalWord =
+        aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+      matches.add(originalWord);
+
+      if (!actualMatches.has(originalWord)) {
+        actualMatches.set(originalWord, []);
+      }
+      actualMatches.get(originalWord)?.push(match[0]);
     }
   });
 
@@ -100,7 +119,14 @@ export function findProfanity(
 
       let match;
       while ((match = leetRegex.exec(text)) !== null) {
-        matches.add(word.toLowerCase());
+        const originalWord =
+          aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        matches.add(originalWord);
+
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(match[0]);
       }
     });
   }
@@ -117,40 +143,84 @@ export function findProfanity(
 
       let match;
       while ((match = variantRegex.exec(text)) !== null) {
-        matches.add(word.toLowerCase());
+        const originalWord =
+          aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        matches.add(originalWord);
+
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(match[0]);
       }
     });
   }
 
   if (detectSplit) {
-    if (detectSplitWords(text, wordsToCheck)) {
-      wordsToCheck.forEach((word) => {
-        const splitRegex = createWordRegex(word, {
-          wholeWord: false,
-          caseSensitive: false,
-          leetSpeak: false,
-          detectSplit: true,
-          indonesianVariation: false,
-        });
+    wordsToCheck.forEach((word) => {
+      const splitRegex = createWordRegex(word, {
+        wholeWord: false,
+        caseSensitive: false,
+        leetSpeak: false,
+        detectSplit: true,
+        indonesianVariation: false,
+      });
 
-        if (splitRegex.test(text)) {
-          matches.add(word.toLowerCase());
+      let match;
+      while ((match = splitRegex.exec(text)) !== null) {
+        const originalWord =
+          aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        matches.add(originalWord);
+
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
         }
+        actualMatches.get(originalWord)?.push(match[0]);
+      }
+    });
+  }
+
+  if (detectSimilarity) {
+    if (useLevenshtein) {
+      const possibleProfanity = findProfanityByLevenshteinDistance(
+        text,
+        wordsToCheck,
+        similarityThreshold,
+        maxLevenshteinDistance,
+      );
+
+      possibleProfanity.forEach((item) => {
+        const originalWord =
+          aliasMap.get(item.original.toLowerCase()) ||
+          item.original.toLowerCase();
+        matches.add(originalWord);
+
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(item.word);
+      });
+    } else {
+      const possibleProfanity = findPossibleProfanityBySimiliarity(
+        text,
+        wordsToCheck,
+        similarityThreshold,
+      );
+
+      possibleProfanity.forEach((item) => {
+        matches.add(item.original.toLowerCase());
+
+        const originalWord =
+          aliasMap.get(item.original.toLowerCase()) ||
+          item.original.toLowerCase();
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(item.word);
       });
     }
   }
 
-  if (detectSimilarity) {
-    const possibleProfanity = findPossibleProfanityBySimiliarity(
-      text,
-      wordsToCheck,
-      similarityThreshold,
-    );
-
-    possibleProfanity.forEach((item) => {
-      matches.add(item.original.toLowerCase());
-    });
-  }
+  (findProfanity as FindProfanityFunction).lastActualMatches = actualMatches;
 
   return Array.from(matches);
 }

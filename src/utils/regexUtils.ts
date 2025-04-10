@@ -72,7 +72,6 @@ export function addLeetSpeakVariations(pattern: string): string {
     z: ["z", "2"],
   };
 
-  // Ganti tiap karakter dengan variasinya dalam grup character class
   return pattern
     .split("")
     .map((char) => {

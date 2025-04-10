@@ -50,9 +50,11 @@ export interface FilterOptions {
   useRandomGrawlix?: boolean;
   keepFirstAndLast?: boolean;
   indonesianVariation?: boolean;
-  detectSimilarity?: boolean;
-  similarityThreshold?: number;
+  detectSimilarity?: boolean; // Enable/disable Levenshtein distance matching
+  similarityThreshold?: number; // Threshold for Levenshtein distance similarity (0-1)
   detectSplit?: boolean;
+  useLevenshtein?: boolean; // New option specifically for Levenshtein algorithm
+  maxLevenshteinDistance?: number; // Maximum allowed Levenshtein distance
 }
 
 export interface FilterResult {

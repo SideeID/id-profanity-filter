@@ -1,7 +1,6 @@
 import {
   FilterOptions,
   AnalysisResult,
-  ProfanityWord,
   ProfanityCategory,
   Region,
 } from "../types";
@@ -12,12 +11,7 @@ import {
   findRegions,
   calculateSeverity,
 } from "./matcher";
-import {
-  normalizeText,
-  escapeRegExp,
-  splitIntoSentences,
-  getContextAroundIndex,
-} from "../utils/stringUtils";
+import { splitIntoSentences } from "../utils/stringUtils";
 import { findPossibleProfanityBySimiliarity } from "../utils/similarityUtils";
 import { createContextRegex } from "../utils/regexUtils";
 import { DEFAULT_OPTIONS } from "../config/options";

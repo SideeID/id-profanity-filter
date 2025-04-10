@@ -7,6 +7,8 @@ export const DEFAULT_OPTIONS: FilterOptions = {
   checkSubstring: false,
   whitelist: [],
   severityThreshold: 0,
+  useLevenshtein: false,
+  maxLevenshteinDistance: 2,
 };
 
 export const FILTER_PRESETS = {
