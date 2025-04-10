@@ -1,17 +1,20 @@
 import {
   FilterOptions,
   AnalysisResult,
-  ProfanityWord,
   ProfanityCategory,
   Region,
-} from '../types';
+} from "../types";
 import {
   findProfanity,
   findProfanityWithMetadata,
   findCategories,
   findRegions,
   calculateSeverity,
-} from './matcher';
+} from "./matcher";
+import { splitIntoSentences } from "../utils/stringUtils";
+import { findPossibleProfanityBySimiliarity } from "../utils/similarityUtils";
+import { createContextRegex } from "../utils/regexUtils";
+import { DEFAULT_OPTIONS } from "../config/options";
 
 /**
  * Menganalisis teks untuk kata kotor
@@ -24,7 +27,9 @@ export function analyze(
   text: string,
   options: FilterOptions = {},
 ): AnalysisResult {
-  const matches = findProfanity(text, options);
+  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
+
+  const matches = findProfanity(text, mergedOptions);
 
   if (matches.length === 0) {
     return {
@@ -37,10 +42,25 @@ export function analyze(
     };
   }
 
-  const matchDetails = findProfanityWithMetadata(text, options);
+  const matchDetails = findProfanityWithMetadata(text, mergedOptions);
   const categories = findCategories(matchDetails);
   const regions = findRegions(matchDetails);
   const severityScore = calculateSeverity(matchDetails);
+
+  let similarWords: Array<{
+    word: string;
+    original: string;
+    similarity: number;
+  }> = [];
+
+  if (mergedOptions.detectSimilarity) {
+    const wordList = matchDetails.map((word) => word.word);
+    similarWords = findPossibleProfanityBySimiliarity(
+      text,
+      wordList,
+      mergedOptions.similarityThreshold || 0.8,
+    );
+  }
 
   return {
     hasProfanity: true,
@@ -49,13 +69,14 @@ export function analyze(
     categories,
     regions,
     severityScore,
+    similarWords: mergedOptions.detectSimilarity ? similarWords : undefined,
   };
 }
 
 /**
- * menganalisis daftar teks dan ringkasan
+ * Menganalisis daftar teks dan ringkasan
  *
- * @param texts Daftar teks yagn dianalisis
+ * @param texts Daftar teks yang dianalisis
  * @param options Opsi untuk analisis
  * @return Objek dengan ringkasan analisis
  */
@@ -71,7 +92,8 @@ export function batchAnalyze(
   topRegions: Region[];
   mostFrequentWords: Array<{ word: string; count: number }>;
 } {
-  const results = texts.map((text) => analyze(text, options));
+  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
+  const results = texts.map((text) => analyze(text, mergedOptions));
   const profaneTexts = results.filter((result) => result.hasProfanity).length;
   const totalSeverity = results.reduce(
     (sum, result) => sum + result.severityScore,
@@ -134,12 +156,11 @@ export function analyzeBySentence(
   text: string,
   options: FilterOptions = {},
 ): Array<AnalysisResult & { sentence: string }> {
-  const sentences = text
-    .split(/(?<=[.!?])\s+/)
-    .filter((sentence) => sentence.trim().length > 0);
+  const sentences = splitIntoSentences(text);
+  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
   return sentences.map((sentence) => {
-    const result = analyze(sentence, options);
+    const result = analyze(sentence, mergedOptions);
 
     return {
       ...result,
@@ -152,7 +173,7 @@ export function analyzeBySentence(
  * Menganalisis teks untuk menemukan kata kotor pada konteks tertentu
  *
  * @param text Teks yang akan dianalisis
- * @param context Kata konteks untuk dicari di dekat kata kotor
+ * @param contextWindowSize Ukuran konteks (jumlah kata) di sekitar kata kotor
  * @param options Opsi untuk analisis
  * @returns Konteks di dekat kata kotor
  */
@@ -165,7 +186,8 @@ export function analyzeWithContext(
   context: string;
   position: { start: number; end: number };
 }> {
-  const matches = findProfanity(text, options);
+  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
+  const matches = findProfanity(text, mergedOptions);
 
   if (matches.length === 0) {
     return [];
@@ -174,16 +196,13 @@ export function analyzeWithContext(
   const result = [];
 
   for (const word of matches) {
-    const regex = new RegExp(
-      `((?:\\S+\\s+){0,${contextWindowSize}})(\\b${escapeRegExp(word)}\\b)((?:\\s+\\S+){0,${contextWindowSize}})`,
-      'gi',
-    );
+    const regex = createContextRegex(word, contextWindowSize);
 
     let match;
     while ((match = regex.exec(text)) !== null) {
-      const beforeContext = match[1] || '';
+      const beforeContext = match[1] || "";
       const wordMatch = match[2];
-      const afterContext = match[3] || '';
+      const afterContext = match[3] || "";
 
       result.push({
         word: wordMatch,
@@ -197,8 +216,4 @@ export function analyzeWithContext(
   }
 
   return result;
-}
-
-function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

@@ -1,16 +1,27 @@
-export * from './types';
-export * from './core/matcher';
-export * from './core/filter';
-export * from './core/analyzer';
+export * from "./types";
+export * from "./core/matcher";
+export * from "./core/filter";
+export * from "./core/analyzer";
+export * from "./utils/stringUtils";
+export * from "./utils/regexUtils";
+export * from "./utils/similarityUtils";
+export * from "./config/options";
 
-import { filter, isProfane } from './core/filter';
+import { filter, isProfane } from "./core/filter";
 import {
   analyze,
   batchAnalyze,
   analyzeBySentence,
   analyzeWithContext,
-} from './core/analyzer';
-import { FilterOptions, FilterResult, AnalysisResult } from './types';
+} from "./core/analyzer";
+import { FilterOptions, FilterResult, AnalysisResult } from "./types";
+import {
+  DEFAULT_OPTIONS,
+  FILTER_PRESETS,
+  CATEGORY_PRESETS,
+  REGION_PRESETS,
+  getPresetOptions,
+} from "./config/options";
 
 export class IDProfanityFilter {
   private options: FilterOptions;
@@ -20,7 +31,7 @@ export class IDProfanityFilter {
    * @param options Opsi untuk filter
    */
   constructor(options: FilterOptions = {}) {
-    this.options = options;
+    this.options = { ...DEFAULT_OPTIONS, ...options };
   }
 
   /**
@@ -90,6 +101,18 @@ export class IDProfanityFilter {
   }
 
   /**
+   * Menggunakan preset yang telah ditentukan
+   * @param presetName Nama preset yang akan digunakan
+   * @param additionalOptions Opsi tambahan untuk override
+   */
+  usePreset(
+    presetName: string,
+    additionalOptions: Partial<FilterOptions> = {},
+  ) {
+    this.options = getPresetOptions(presetName, additionalOptions);
+  }
+
+  /**
    * Menetapkan daftar kata kustom
    * @param wordList Daftar kata untuk digunakan
    */
@@ -119,15 +142,66 @@ export class IDProfanityFilter {
       (w) => w.toLowerCase() !== word.toLowerCase(),
     );
   }
+
+  /**
+   * Mengaktifkan deteksi variasi ejaan Indonesia
+   */
+  enableIndonesianVariations() {
+    this.options.indonesianVariation = true;
+  }
+
+  /**
+   * Mengaktifkan deteksi kata yang dipisah
+   */
+  enableSplitWordDetection() {
+    this.options.detectSplit = true;
+  }
+
+  /**
+   * Mengaktifkan deteksi berdasarkan kesamaan
+   * @param threshold Threshold kesamaan (0-1)
+   * @param useLevenshtein Gunakan algoritma Levenshtein untuk deteksi
+   * @param maxLevenshteinDistance Jarak maksimal Levenshtein (default: 2)
+   */
+  enableSimilarityDetection(
+    threshold: number = 0.8,
+    useLevenshtein: boolean = false,
+    maxLevenshteinDistance: number = 2,
+  ) {
+    this.options.detectSimilarity = true;
+    this.options.similarityThreshold = threshold;
+    this.options.useLevenshtein = useLevenshtein;
+    this.options.maxLevenshteinDistance = maxLevenshteinDistance;
+  }
+
+  /**
+   * Mengaktifkan deteksi berbasis Levenshtein distance
+   * @param threshold Threshold kesamaan (0-1)
+   * @param maxDistance Jarak maksimal Levenshtein (default: 2)
+   */
+  enableLevenshteinDetection(threshold: number = 0.8, maxDistance: number = 2) {
+    this.options.detectSimilarity = true;
+    this.options.useLevenshtein = true;
+    this.options.similarityThreshold = threshold;
+    this.options.maxLevenshteinDistance = maxDistance;
+  }
 }
 
 export default IDProfanityFilter;
 
 export const idFilter = {
-  filter: (text: string, options?: FilterOptions) => filter(text, options),
+  filter: (text: string, options?: FilterOptions) =>
+    filter(text, { ...DEFAULT_OPTIONS, ...options }),
   isProfane: (text: string, options?: FilterOptions) =>
-    isProfane(text, options),
-  analyze: (text: string, options?: FilterOptions) => analyze(text, options),
+    isProfane(text, { ...DEFAULT_OPTIONS, ...options }),
+  analyze: (text: string, options?: FilterOptions) =>
+    analyze(text, { ...DEFAULT_OPTIONS, ...options }),
   batchAnalyze: (texts: string[], options?: FilterOptions) =>
-    batchAnalyze(texts, options),
+    batchAnalyze(texts, { ...DEFAULT_OPTIONS, ...options }),
+  getPresetOptions,
+  presets: {
+    filter: FILTER_PRESETS,
+    category: CATEGORY_PRESETS,
+    region: REGION_PRESETS,
+  },
 };

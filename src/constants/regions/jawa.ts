@@ -337,6 +337,16 @@ export const jawa: ProfanityWord[] = [
     description: "",
     context: "",
   },
+  {
+    word: "itil",
+    category: "sexual",
+    region: "jawa",
+    severity: 0.9,
+    aliases: ["itl", "itul"],
+    description:
+      "Kata vulgar yang mengacu pada bagian dari alat kelamin perempuan",
+    context: "Kata vulgar yang merujuk pada anatomi seksual",
+  },
 ];
 
 export const jawaWords = jawa.map((item) => item.word);

@@ -1,18 +1,17 @@
-import { ProfanityWord } from '../types';
+import { ProfanityWord } from "../types";
+import { sexualWords } from "./categories/sexual";
+import { insultWords } from "./categories/insult";
+// import { profanityWords } from './categories/profanity';
+// import { slurWords } from './categories/slur';
+// import { drugsWords } from './categories/drugs';
+// import { disgustingWords } from './categories/disgusting';
+// import { blasphemyWords } from './categories/blasphemy';
 
-import { sexual, sexualWords } from './categories/sexual';
-import { insult, insultWords } from './categories/insult';
-// import { profanity, profanityWords } from './categories/profanity';
-// import { slur, slurWords } from './categories/slur';
-// import { drugs, drugsWords } from './categories/drugs';
-// import { disgusting, disgustingWords } from './categories/disgusting';
-// import { blasphemy, blasphemyWords } from './categories/blasphemy';
-
-import { general, generalWords } from './regions/general';
-import { jawa, jawaWords } from './regions/jawa';
-import { sunda, sundaWords } from './regions/sunda';
-import { betawi, betawiWords } from './regions/betawi';
-import { batak, batakWords } from './regions/batak';
+import { general, generalWords } from "./regions/general";
+import { jawa, jawaWords } from "./regions/jawa";
+import { sunda, sundaWords } from "./regions/sunda";
+import { betawi, betawiWords } from "./regions/betawi";
+import { batak, batakWords } from "./regions/batak";
 // import { minang, minangWords } from './regions/minang';
 // import { bali, baliWords } from './regions/bali';
 // import { madura, maduraWords } from './regions/madura';
@@ -96,6 +95,14 @@ export const severeWords: string[] = wordObjects
  * @returns Array dari kata kotor
  */
 export function getWordsByFilter(category?: string, region?: string): string[] {
+  if (category && !region && category in wordCategories) {
+    return wordCategories[category as keyof typeof wordCategories];
+  }
+
+  if (region && !category && region in wordRegions) {
+    return wordRegions[region as keyof typeof wordRegions];
+  }
+
   return wordObjects
     .filter((word) => {
       const matchCategory = category ? word.category === category : true;

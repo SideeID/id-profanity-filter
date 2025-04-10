@@ -3,9 +3,21 @@ import {
   ProfanityCategory,
   Region,
   FilterOptions,
-} from '../types';
+} from "../types";
 
-import { wordObjects, getWordsByFilter } from '../constants/wordList';
+import { wordObjects } from "../constants/wordList";
+import { normalizeText } from "../utils/stringUtils";
+import { createWordRegex } from "../utils/regexUtils";
+import {
+  findPossibleProfanityBySimiliarity,
+  findProfanityByLevenshteinDistance,
+} from "../utils/similarityUtils";
+import { DEFAULT_OPTIONS } from "../config/options";
+
+interface FindProfanityFunction {
+  (text: string, options?: FilterOptions): string[];
+  lastActualMatches?: Map<string, string[]>;
+}
 
 export function findProfanity(
   text: string,
@@ -19,148 +31,198 @@ export function findProfanity(
     categories,
     regions,
     severityThreshold = 0,
-  } = options;
+    indonesianVariation = false,
+    detectSimilarity = false,
+    similarityThreshold = 0.8,
+    detectSplit = false,
+    useLevenshtein = false,
+    maxLevenshteinDistance = 2,
+  } = { ...DEFAULT_OPTIONS, ...options };
 
   const normalizedText = normalizeText(text);
 
-  let wordsToCheck: string[] = wordList;
+  let baseWordsToCheck: string[] = wordList.length > 0 ? wordList : [];
 
-  if (wordsToCheck.length === 0) {
-    if (categories || regions || severityThreshold > 0) {
-      wordsToCheck = wordObjects
-        .filter((word) => {
-          const matchCategory = categories
-            ? categories.includes(word.category)
-            : true;
-          const matchRegion = regions ? regions.includes(word.region) : true;
-          const matchSeverity = word.severity >= severityThreshold;
-          return matchCategory && matchRegion && matchSeverity;
-        })
-        .map((word) => word.word);
-    } else {
-      wordsToCheck = wordObjects.map((word) => word.word);
-    }
+  if (baseWordsToCheck.length === 0) {
+    const filteredWords = wordObjects.filter((word) => {
+      const matchCategory = categories
+        ? categories.includes(word.category)
+        : true;
+      const matchRegion = regions ? regions.includes(word.region) : true;
+      const matchSeverity = word.severity >= severityThreshold;
+      return matchCategory && matchRegion && matchSeverity;
+    });
+
+    baseWordsToCheck = filteredWords.map((word) => word.word);
   }
 
-  wordsToCheck = wordsToCheck.filter(
-    (word) => !whitelist.includes(word.toLocaleLowerCase()),
-  );
+  const aliasMap = new Map<string, string>();
+  wordObjects.forEach((wordObj) => {
+    if (wordObj.aliases && wordObj.aliases.length > 0) {
+      const matchCategory = categories
+        ? categories.includes(wordObj.category)
+        : true;
+      const matchRegion = regions ? regions.includes(wordObj.region) : true;
+      const matchSeverity = wordObj.severity >= severityThreshold;
+
+      if (matchCategory && matchRegion && matchSeverity) {
+        wordObj.aliases.forEach((alias) => {
+          aliasMap.set(alias.toLowerCase(), wordObj.word.toLowerCase());
+        });
+      }
+    }
+  });
+
+  const wordsToCheck = [
+    ...baseWordsToCheck,
+    ...Array.from(aliasMap.keys()),
+  ].filter((word) => !whitelist.includes(word.toLowerCase()));
 
   if (wordsToCheck.length === 0) {
     return [];
   }
 
   const matches = new Set<string>();
+  const actualMatches = new Map<string, string[]>();
 
   wordsToCheck.forEach((word) => {
-    const pattern = checkSubstring ? word : `\\b${escapeRegExp(word)}\\b`;
-
-    const regex = new RegExp(pattern, 'gi');
+    const regex = createWordRegex(word, {
+      wholeWord: !checkSubstring,
+      caseSensitive: false,
+      leetSpeak: false,
+      detectSplit: false,
+      indonesianVariation: false,
+    });
 
     let match;
     while ((match = regex.exec(normalizedText)) !== null) {
-      matches.add(match[0].toLowerCase());
+      const originalWord =
+        aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+      matches.add(originalWord);
+
+      if (!actualMatches.has(originalWord)) {
+        actualMatches.set(originalWord, []);
+      }
+      actualMatches.get(originalWord)?.push(match[0]);
     }
   });
 
-  // jika detectLeetSpeak diaktifkan, cari variasi leet speak
   if (detectLeetSpeak) {
     wordsToCheck.forEach((word) => {
-      // Cek leet speak
-      const leetPattern = createLeetSpeakPattern(word);
-      const leetRegex = new RegExp(
-        checkSubstring ? leetPattern : `\\b${leetPattern}\\b`,
-        'gi',
-      );
+      const leetRegex = createWordRegex(word, {
+        wholeWord: !checkSubstring,
+        caseSensitive: false,
+        leetSpeak: true,
+        detectSplit: false,
+        indonesianVariation: false,
+      });
 
       let match;
       while ((match = leetRegex.exec(text)) !== null) {
-        matches.add(word.toLowerCase());
-      }
+        const originalWord =
+          aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        matches.add(originalWord);
 
-      // cek karakter yang dipisah
-      const evasionPattern = createEvasionPattern(word);
-      const evasionRegex = new RegExp(evasionPattern, 'gi');
-      while ((match = evasionRegex.exec(text)) !== null) {
-        matches.add(word.toLowerCase());
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(match[0]);
       }
     });
   }
 
-  return Array.from(matches);
-}
+  if (indonesianVariation) {
+    wordsToCheck.forEach((word) => {
+      const variantRegex = createWordRegex(word, {
+        wholeWord: !checkSubstring,
+        caseSensitive: false,
+        leetSpeak: false,
+        detectSplit: false,
+        indonesianVariation: true,
+      });
 
-/**
- * Menormalisasi teks untuk perbandingan
- *
- * @param text Teks untuk dinormalisasi
- * @returns Teks yang dinormalisasi
- */
-function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD') // Normalisasi Unicode
-    .replace(/[\u0300-\u036f]/g, '') // Hapus diacritic marks
-    .trim();
-}
+      let match;
+      while ((match = variantRegex.exec(text)) !== null) {
+        const originalWord =
+          aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        matches.add(originalWord);
 
-/**
- * Escape karakter khusus dalam regex
- *
- * @param string String untuk di-escape
- * @returns String yang sudah di-escape
- */
-function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/**
- * Pattern untuk leet speak
- *
- * @param word Kata untuk dibuat pattern leet speak
- * @return Pattern regex untuk leet speak
- */
-function createLeetSpeakPattern(word: string): string {
-  const leetMap: Record<string, string[]> = {
-    a: ['a', '4', '@'],
-    b: ['b', '8', '6'],
-    c: ['c', '<', '(', '{'],
-    e: ['e', '3'],
-    g: ['g', '9'],
-    i: ['i', '1', '!'],
-    l: ['l', '1', '|'],
-    o: ['o', '0'],
-    s: ['s', '5', '$'],
-    t: ['t', '7', '+'],
-    z: ['z', '2'],
-  };
-
-  return word
-    .split('')
-    .map((char) => {
-      const lowerChar = char.toLowerCase();
-      const replacements = leetMap[lowerChar];
-
-      if (replacements && replacements.length > 0) {
-        return `[${replacements.join('')}]`;
-      } else {
-        return escapeRegExp(char);
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(match[0]);
       }
-    })
-    .join('');
-}
+    });
+  }
 
-/**
- * Pattern untuk deteksi upaya menghindari filter
- *
- * @param word Kata untuk dibuat pattern evasion
- * @return Pattern regex untuk evasion
- */
-function createEvasionPattern(word: string): string {
-  return word
-    .split('')
-    .map((char) => escapeRegExp(char))
-    .join('[\\s\\-._*+]?');
+  if (detectSplit) {
+    wordsToCheck.forEach((word) => {
+      const splitRegex = createWordRegex(word, {
+        wholeWord: false,
+        caseSensitive: false,
+        leetSpeak: false,
+        detectSplit: true,
+        indonesianVariation: false,
+      });
+
+      let match;
+      while ((match = splitRegex.exec(text)) !== null) {
+        const originalWord =
+          aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        matches.add(originalWord);
+
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(match[0]);
+      }
+    });
+  }
+
+  if (detectSimilarity) {
+    if (useLevenshtein) {
+      const possibleProfanity = findProfanityByLevenshteinDistance(
+        text,
+        wordsToCheck,
+        similarityThreshold,
+        maxLevenshteinDistance,
+      );
+
+      possibleProfanity.forEach((item) => {
+        const originalWord =
+          aliasMap.get(item.original.toLowerCase()) ||
+          item.original.toLowerCase();
+        matches.add(originalWord);
+
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(item.word);
+      });
+    } else {
+      const possibleProfanity = findPossibleProfanityBySimiliarity(
+        text,
+        wordsToCheck,
+        similarityThreshold,
+      );
+
+      possibleProfanity.forEach((item) => {
+        matches.add(item.original.toLowerCase());
+
+        const originalWord =
+          aliasMap.get(item.original.toLowerCase()) ||
+          item.original.toLowerCase();
+        if (!actualMatches.has(originalWord)) {
+          actualMatches.set(originalWord, []);
+        }
+        actualMatches.get(originalWord)?.push(item.word);
+      });
+    }
+  }
+
+  (findProfanity as FindProfanityFunction).lastActualMatches = actualMatches;
+
+  return Array.from(matches);
 }
 
 /**
@@ -198,8 +260,8 @@ export function findProfanityWithMetadata(
 /**
  * Mencari kategory kata kotor yang ada dalam teks
  *
- * @param text matchDetails Hasil pencarian dari fingProfanityWithMetadata()
- * @param options Opsi untuk pencarian kategori
+ * @param matchDetails Hasil pencarian dari fingProfanityWithMetadata()
+ * @return Array kategori unik
  */
 export function findCategories(
   matchDetails: ProfanityWord[],
@@ -216,8 +278,8 @@ export function findCategories(
 /**
  * Mencari region kata kotor yang ada dalam teks
  *
- * @param text matchDetails Hasil pencarian dari fingProfanityWithMetadata()
- * @param options Opsi untuk pencarian region
+ * @param matchDetails Hasil pencarian dari fingProfanityWithMetadata()
+ * @return Array region unik
  */
 export function findRegions(matchDetails: ProfanityWord[]): Region[] {
   const regions = new Set<Region>();
