@@ -1,18 +1,18 @@
-import { ProfanityWord } from '../types';
+import { ProfanityWord } from "../types";
 
-import { sexual, sexualWords } from './categories/sexual';
-import { insult, insultWords } from './categories/insult';
+import { sexual, sexualWords } from "./categories/sexual";
+import { insult, insultWords } from "./categories/insult";
 // import { profanity, profanityWords } from './categories/profanity';
 // import { slur, slurWords } from './categories/slur';
 // import { drugs, drugsWords } from './categories/drugs';
 // import { disgusting, disgustingWords } from './categories/disgusting';
 // import { blasphemy, blasphemyWords } from './categories/blasphemy';
 
-import { general, generalWords } from './regions/general';
-import { jawa, jawaWords } from './regions/jawa';
-import { sunda, sundaWords } from './regions/sunda';
-import { betawi, betawiWords } from './regions/betawi';
-import { batak, batakWords } from './regions/batak';
+import { general, generalWords } from "./regions/general";
+import { jawa, jawaWords } from "./regions/jawa";
+import { sunda, sundaWords } from "./regions/sunda";
+import { betawi, betawiWords } from "./regions/betawi";
+import { batak, batakWords } from "./regions/batak";
 // import { minang, minangWords } from './regions/minang';
 // import { bali, baliWords } from './regions/bali';
 // import { madura, maduraWords } from './regions/madura';
