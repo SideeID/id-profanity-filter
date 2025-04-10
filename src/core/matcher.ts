@@ -3,27 +3,21 @@ import {
   ProfanityCategory,
   Region,
   FilterOptions,
-} from "../types";
+} from '../types';
 
-import { wordObjects, getWordsByFilter } from "../constants/wordList";
-import {
-  normalizeText,
-  escapeRegExp,
-  containsAnyWord,
-  detectSplitWords,
-} from "../utils/stringUtils";
-import {
-  createWordRegex,
-  addLeetSpeakVariations,
-  addIndonesianVariations,
-  addSplitVariations,
-} from "../utils/regexUtils";
+import { wordObjects } from '../constants/wordList';
+import { normalizeText } from '../utils/stringUtils';
+import { createWordRegex } from '../utils/regexUtils';
 import {
   findPossibleProfanityBySimiliarity,
-  stringSimilarity,
   findProfanityByLevenshteinDistance,
-} from "../utils/similarityUtils";
-import { DEFAULT_OPTIONS } from "../config/options";
+} from '../utils/similarityUtils';
+import { DEFAULT_OPTIONS } from '../config/options';
+
+interface FindProfanityFunction {
+  (text: string, options?: FilterOptions): string[];
+  lastActualMatches?: Map<string, string[]>;
+}
 
 export function findProfanity(
   text: string,
@@ -226,7 +220,7 @@ export function findProfanity(
     }
   }
 
-  (findProfanity as any).lastActualMatches = actualMatches;
+  (findProfanity as FindProfanityFunction).lastActualMatches = actualMatches;
 
   return Array.from(matches);
 }
