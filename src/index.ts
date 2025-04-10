@@ -1,20 +1,20 @@
-export * from "./types";
-export * from "./core/matcher";
-export * from "./core/filter";
-export * from "./core/analyzer";
-export * from "./utils/stringUtils";
-export * from "./utils/regexUtils";
-export * from "./utils/similarityUtils";
-export * from "./config/options";
+export * from './types';
+export * from './core/matcher';
+export * from './core/filter';
+export * from './core/analyzer';
+export * from './utils/stringUtils';
+export * from './utils/regexUtils';
+export * from './utils/similarityUtils';
+export * from './config/options';
 
-import { filter, isProfane } from "./core/filter";
+import { filter, isProfane } from './core/filter';
 import {
   analyze,
   batchAnalyze,
   analyzeBySentence,
   analyzeWithContext,
-} from "./core/analyzer";
-import { FilterOptions, FilterResult, AnalysisResult } from "./types";
+} from './core/analyzer';
+import { FilterOptions, FilterResult, AnalysisResult } from './types';
 import {
   DEFAULT_OPTIONS,
   FILTER_PRESETS,
@@ -22,7 +22,7 @@ import {
   REGION_PRESETS,
   getPresetOptions,
   makeRandomGrawlixString,
-} from "./config/options";
+} from './config/options';
 
 export class IDProfanityFilter {
   private options: FilterOptions;
@@ -161,10 +161,30 @@ export class IDProfanityFilter {
   /**
    * Mengaktifkan deteksi berdasarkan kesamaan
    * @param threshold Threshold kesamaan (0-1)
+   * @param useLevenshtein Gunakan algoritma Levenshtein untuk deteksi
+   * @param maxLevenshteinDistance Jarak maksimal Levenshtein (default: 2)
    */
-  enableSimilarityDetection(threshold: number = 0.8) {
+  enableSimilarityDetection(
+    threshold: number = 0.8,
+    useLevenshtein: boolean = false,
+    maxLevenshteinDistance: number = 2,
+  ) {
     this.options.detectSimilarity = true;
     this.options.similarityThreshold = threshold;
+    this.options.useLevenshtein = useLevenshtein;
+    this.options.maxLevenshteinDistance = maxLevenshteinDistance;
+  }
+
+  /**
+   * Mengaktifkan deteksi berbasis Levenshtein distance
+   * @param threshold Threshold kesamaan (0-1)
+   * @param maxDistance Jarak maksimal Levenshtein (default: 2)
+   */
+  enableLevenshteinDetection(threshold: number = 0.8, maxDistance: number = 2) {
+    this.options.detectSimilarity = true;
+    this.options.useLevenshtein = true;
+    this.options.similarityThreshold = threshold;
+    this.options.maxLevenshteinDistance = maxDistance;
   }
 }
 
