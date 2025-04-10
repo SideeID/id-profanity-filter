@@ -194,3 +194,74 @@ export function findProfanityWithMetadata(
     })
     .filter((word): word is ProfanityWord => word !== undefined);
 }
+
+/**
+ * Mencari kategory kata kotor yang ada dalam teks
+ *
+ * @param text matchDetails Hasil pencarian dari fingProfanityWithMetadata()
+ * @param options Opsi untuk pencarian kategori
+ */
+export function findCategories(
+  matchDetails: ProfanityWord[],
+): ProfanityCategory[] {
+  const categories = new Set<ProfanityCategory>();
+
+  matchDetails.forEach((word) => {
+    categories.add(word.category);
+  });
+
+  return Array.from(categories);
+}
+
+/**
+ * Mencari region kata kotor yang ada dalam teks
+ *
+ * @param text matchDetails Hasil pencarian dari fingProfanityWithMetadata()
+ * @param options Opsi untuk pencarian region
+ */
+export function findRegions(matchDetails: ProfanityWord[]): Region[] {
+  const regions = new Set<Region>();
+
+  matchDetails.forEach((word) => {
+    regions.add(word.region);
+  });
+
+  return Array.from(regions);
+}
+
+/**
+ * Menghitung tingkat keparahan kata kotor yang ditemukan
+ *
+ * @param matchDetails Hasil pencarian dari findProfanityWithMetadata()
+ * @return Skor keparahan dari 0-1
+ */
+export function calculateSeverity(matchDetails: ProfanityWord[]): number {
+  if (matchDetails.length === 0) {
+    return 0;
+  }
+
+  const countFactor = Math.min(matchDetails.length / 10, 1); // Maksimal 10 kata
+
+  const categoryWeights: Record<ProfanityCategory, number> = {
+    sexual: 0.9,
+    blasphemy: 0.9,
+    slur: 0.8,
+    profanity: 0.7,
+    insult: 0.6,
+    drugs: 0.5,
+    disgusting: 0.5,
+  };
+
+  let severitySum = 0;
+  matchDetails.forEach((word) => {
+    const categoryWeight = categoryWeights[word.category] || 0.5;
+    const wordSeverity = word.severity * categoryWeight;
+    severitySum += wordSeverity;
+  });
+
+  const severityAvg = severitySum / matchDetails.length;
+
+  // Gabungkan jumlah kata dan keparahan rata-rata
+  // 70% keparahan kata + 30% faktor jumlah
+  return 0.7 * severityAvg + 0.3 * countFactor;
+}
