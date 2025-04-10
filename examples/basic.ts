@@ -1,52 +1,71 @@
+import { IDProfanityFilter, idFilter } from '../src/index';
+
 /**
- * Contoh penggunaan dasar ID-Profanity-Filter
+ * Contoh Penggunaan Dasar ID-Profanity-Filter
+ * ==========================================
+ * File ini menunjukkan fungsi dasar dari library.
  */
-import IDProfanityFilter from '../src/index';
 
-// Contoh penggunaan sederhana
+console.log('=== Contoh Penggunaan Dasar ID-Profanity-Filter ===\n');
 
-// 1. Buat instance filter
+// ===== Contoh 1: Inisialisasi dasar =====
 const filter = new IDProfanityFilter();
 
-// 2. Contoh teks dengan kata kasar
-const text = 'Dasar anjing kamu, jangan banyak bacot!';
+const teks = 'Dasar anjing kamu, jangan banyak bacot!';
+console.log('Teks asli:', teks);
 
-// 3. Cek apakah teks mengandung kata kotor
-const hasProfanity = filter.isProfane(text);
-console.log('Teks mengandung kata kotor:', hasProfanity);
+// Cek apakah teks mengandung kata kotor
+const hasProfanity = filter.isProfane(teks);
+console.log('Mengandung kata kotor?', hasProfanity);
 
-// 4. Filter kata kotor
-const filteredResult = filter.filter(text);
-console.log('Teks asli:', text);
-console.log('Teks tersensor:', filteredResult.filtered);
-console.log('Jumlah kata yang disensor:', filteredResult.censored);
-console.log('Kata-kata yang disensor:', filteredResult.replacements);
+// Filter kata kotor (sensorisasi)
+const hasil = filter.filter(teks);
+console.log('Teks disensor:', hasil.filtered);
+console.log('Jumlah kata disensor:', hasil.censored);
+console.log('Detail penggantian:', hasil.replacements);
 
-// 5. Analisis teks
-const analysis = filter.analyze(text);
-console.log('\nHasil Analisis:');
-console.log('- Mengandung kata kotor:', analysis.hasProfanity);
-console.log('- Kata kotor yang ditemukan:', analysis.matches);
-console.log('- Kategori kata kotor:', analysis.categories);
-console.log('- Daerah asal kata kotor:', analysis.regions);
-console.log('- Skor keparahan:', analysis.severityScore);
+console.log('\n=== Contoh Analisis Dasar ===\n');
 
-// 6. Gunakan opsi kustom
+// Analisis konten
+const analisis = filter.analyze(teks);
+console.log('Mengandung kata kotor?', analisis.hasProfanity);
+console.log('Kata-kata kotor yang ditemukan:', analisis.matches);
+console.log('Kategori kata kotor:', analisis.categories);
+console.log('Daerah asal kata:', analisis.regions);
+console.log('Tingkat keparahan:', analisis.severityScore.toFixed(2));
+
+console.log('\n=== Contoh Fungsi Statis ===\n');
+
+// Menggunakan fungsi statis
+const staticResult = idFilter.filter(teks);
+console.log('Teks disensor (fungsi statis):', staticResult.filtered);
+
+// ===== Contoh 2: Mengubah karakter pengganti =====
+filter.setOptions({ replaceWith: '#' });
+console.log('\nTeks disensor dengan #:', filter.filter(teks).filtered);
+
+// ===== Contoh 3: Hanya menyensor sebagian kata =====
 filter.setOptions({
-  replaceWith: '#',
+  replaceWith: '*',
   fullWordCensor: false,
+  keepFirstAndLast: true,
 });
+console.log(
+  '\nTeks disensor sebagian (first & last):',
+  filter.filter(teks).filtered,
+);
 
-console.log('\nHasil filter dengan opsi kustom:');
-console.log(filter.filter(text).filtered);
+// ===== Contoh 4: Metode analisis lain =====
+const kalimat =
+  'Saya sangat suka filmnya. Tapi pemainnya seperti anjing, aktingnya buruk.';
+console.log('\nContoh kalimat untuk analisis per-kalimat:', kalimat);
 
-// 7. Tambahkan kata ke whitelist (pengecualian)
-filter.addToWhitelist('anjing');
-console.log('\nHasil filter setelah "anjing" di-whitelist:');
-console.log(filter.filter(text).filtered);
-
-// 8. Gunakan fungsi utilitas langsung
-import { idFilter } from '../src/index';
-
-console.log('\nPenggunaan utilitas langsung:');
-console.log(idFilter.filter(text, { replaceWith: '@' }).filtered);
+const kalimatAnalisis = filter.analyzeBySentence(kalimat);
+console.log('\nAnalisis per-kalimat:');
+kalimatAnalisis.forEach((hasil, index) => {
+  console.log(`Kalimat ${index + 1}: ${hasil.sentence}`);
+  console.log(`- Mengandung kata kotor: ${hasil.hasProfanity}`);
+  if (hasil.hasProfanity) {
+    console.log(`- Kata kotor: ${hasil.matches.join(', ')}`);
+  }
+});
