@@ -13,6 +13,7 @@ export default [
         file: pkg.main,
         format: 'cjs',
         sourcemap: true,
+        exports: 'named',
       },
       {
         file: pkg.module,
@@ -23,7 +24,11 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json' }),
+      typescript({
+        tsconfig: './tsconfig.json',
+        declaration: true,
+        declarationDir: './dist/types/',
+      }),
       json(),
     ],
   },
