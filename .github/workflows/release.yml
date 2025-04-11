@@ -2,15 +2,19 @@ name: Create Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+    paths:
+      - 'package.json'
 
 jobs:
-  build-and-release:
+  check-version-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
         
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -18,20 +22,34 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           
+      - name: Check if version changed
+        id: check_version
+        run: |
+          git diff HEAD^ HEAD -- package.json | grep '"version"' || echo "No version change"
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Version changed to $NEW_VERSION"
+        
+      - name: Create Git Tag
+        if: contains(steps.check_version.outputs.VERSION, '.')
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "v${{ steps.check_version.outputs.VERSION }}" -m "Release v${{ steps.check_version.outputs.VERSION }}"
+          git push origin "v${{ steps.check_version.outputs.VERSION }}"
+          
       - name: Install dependencies
         run: npm ci
         
       - name: Build
         run: npm run build
         
-      - name: Extract version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-        
       - name: Create GitHub Release
+        if: contains(steps.check_version.outputs.VERSION, '.')
         uses: softprops/action-gh-release@v1
         with:
-          name: v${{ steps.get_version.outputs.VERSION }}
+          tag_name: v${{ steps.check_version.outputs.VERSION }}
+          name: v${{ steps.check_version.outputs.VERSION }}
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -39,6 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Publish to npm
+        if: contains(steps.check_version.outputs.VERSION, '.')
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
