@@ -3,16 +3,33 @@ import {
   ProfanityCategory,
   Region,
   FilterOptions,
-} from "../types";
+} from '../types';
 
-import { wordObjects } from "../constants/wordList";
-import { normalizeText } from "../utils/stringUtils";
-import { createWordRegex } from "../utils/regexUtils";
+import { wordObjects } from '../constants/wordList';
+import { normalizeText } from '../utils/stringUtils';
+import { createWordRegex } from '../utils/regexUtils';
 import {
   findPossibleProfanityBySimiliarity,
   findProfanityByLevenshteinDistance,
-} from "../utils/similarityUtils";
-import { DEFAULT_OPTIONS } from "../config/options";
+} from '../utils/similarityUtils';
+import { DEFAULT_OPTIONS } from '../config/options';
+import { AhoCorasick } from '../utils/ahoCorasick';
+
+// Create a global AhoCorasick instance that will be initialized once
+const globalAhoCorasick = new AhoCorasick();
+let ahoCorasickInitialized = false;
+
+// Initialize the AhoCorasick automaton with all the words and aliases
+function initializeAhoCorasick(words: string[]) {
+  if (ahoCorasickInitialized) return;
+
+  for (const word of words) {
+    globalAhoCorasick.addPattern(word);
+  }
+
+  globalAhoCorasick.build();
+  ahoCorasickInitialized = true;
+}
 
 interface FindProfanityFunction {
   (text: string, options?: FilterOptions): string[];
@@ -41,6 +58,7 @@ export function findProfanity(
 
   const normalizedText = normalizeText(text);
 
+  // Determine which words to check
   let baseWordsToCheck: string[] = wordList.length > 0 ? wordList : [];
 
   if (baseWordsToCheck.length === 0) {
@@ -56,6 +74,7 @@ export function findProfanity(
     baseWordsToCheck = filteredWords.map((word) => word.word);
   }
 
+  // Build alias map
   const aliasMap = new Map<string, string>();
   wordObjects.forEach((wordObj) => {
     if (wordObj.aliases && wordObj.aliases.length > 0) {
@@ -73,6 +92,7 @@ export function findProfanity(
     }
   });
 
+  // Filter out whitelisted words
   const wordsToCheck = [
     ...baseWordsToCheck,
     ...Array.from(aliasMap.keys()),
@@ -85,28 +105,29 @@ export function findProfanity(
   const matches = new Set<string>();
   const actualMatches = new Map<string, string[]>();
 
-  wordsToCheck.forEach((word) => {
-    const regex = createWordRegex(word, {
-      wholeWord: !checkSubstring,
-      caseSensitive: false,
-      leetSpeak: false,
-      detectSplit: false,
-      indonesianVariation: false,
-    });
+  // For basic matching, use Aho-Corasick algorithm
+  // This section replaces the original loop that matched each word individually
+  // Initialize the automaton if not already initialized
+  const ahoCorasick = new AhoCorasick();
+  for (const word of wordsToCheck) {
+    ahoCorasick.addPattern(word);
+  }
+  ahoCorasick.build();
 
-    let match;
-    while ((match = regex.exec(normalizedText)) !== null) {
-      const originalWord =
-        aliasMap.get(word.toLowerCase()) || word.toLowerCase();
-      matches.add(originalWord);
+  // Find all matches in one pass
+  const basicMatches = ahoCorasick.searchUnique(normalizedText);
+  for (const match of basicMatches) {
+    const originalWord =
+      aliasMap.get(match.toLowerCase()) || match.toLowerCase();
+    matches.add(originalWord);
 
-      if (!actualMatches.has(originalWord)) {
-        actualMatches.set(originalWord, []);
-      }
-      actualMatches.get(originalWord)?.push(match[0]);
+    if (!actualMatches.has(originalWord)) {
+      actualMatches.set(originalWord, []);
     }
-  });
+    actualMatches.get(originalWord)?.push(match);
+  }
 
+  // Rest of the checks (leet speak, Indonesian variation, etc.)
   if (detectLeetSpeak) {
     wordsToCheck.forEach((word) => {
       const leetRegex = createWordRegex(word, {
