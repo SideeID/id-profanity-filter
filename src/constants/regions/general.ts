@@ -204,6 +204,15 @@ export const general: ProfanityWord[] = [
       "Simbol yang sering digunakan untuk menandai konten pornografi",
     context: "Digunakan untuk menandai konten seksual eksplisit",
   },
+  {
+    word: "xnxx",
+    category: "sexual",
+    region: "general",
+    severity: 0.6,
+    aliases: ["xnxx", "xnx"],
+    description: "simbol yang sering digunakan untuk menandai konten pornografi",
+    context: "Digunakan untuk menandai konten seksual eksplisit",
+  }
 ];
 
 export const generalWords = general.map((item) => item.word);
