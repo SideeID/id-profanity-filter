@@ -1,48 +1,44 @@
-name: Create Release on Publish
+name: Create Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
-  release:
+  build-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
+        
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Get current version from package.json
-        id: package-version
-        run: echo "PACKAGE_VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
-
-      - name: Create Git Tag
-        run: |
-          git tag -a "v${{ steps.package-version.outputs.PACKAGE_VERSION }}" -m "Release v${{ steps.package-version.outputs.PACKAGE_VERSION }}"
-          git push origin "v${{ steps.package-version.outputs.PACKAGE_VERSION }}"
-
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build
+        
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.package-version.outputs.PACKAGE_VERSION }}
-          release_name: Release v${{ steps.package-version.outputs.PACKAGE_VERSION }}
-          body: |
-            Rilis versi ${{ steps.package-version.outputs.PACKAGE_VERSION }}
-            - Fitur baru
-            - Perbaikan bug
+          name: v${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
