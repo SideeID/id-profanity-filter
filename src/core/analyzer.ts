@@ -12,7 +12,10 @@ import {
   calculateSeverity,
 } from "./matcher";
 import { splitIntoSentences } from "../utils/stringUtils";
-import { findPossibleProfanityBySimiliarity } from "../utils/similarityUtils";
+import {
+  findPossibleProfanityBySimiliarity,
+  findProfanityByLevenshteinDistance,
+} from "../utils/similarityUtils";
 import { createContextRegex } from "../utils/regexUtils";
 import { DEFAULT_OPTIONS } from "../config/options";
 
@@ -54,12 +57,30 @@ export function analyze(
   }> = [];
 
   if (mergedOptions.detectSimilarity) {
-    const wordList = matchDetails.map((word) => word.word);
-    similarWords = findPossibleProfanityBySimiliarity(
-      text,
-      wordList,
-      mergedOptions.similarityThreshold || 0.8,
-    );
+    if (matchDetails.length > 0) {
+      const wordList = matchDetails.map((word) => word.word);
+
+      if (mergedOptions.useLevenshtein) {
+        const levenshteinResults = findProfanityByLevenshteinDistance(
+          text,
+          wordList,
+          mergedOptions.similarityThreshold || 0.8,
+          mergedOptions.maxLevenshteinDistance || 2,
+        );
+
+        similarWords = levenshteinResults.map((item) => ({
+          word: item.word,
+          original: item.original,
+          similarity: item.similarity,
+        }));
+      } else {
+        similarWords = findPossibleProfanityBySimiliarity(
+          text,
+          wordList,
+          mergedOptions.similarityThreshold || 0.8,
+        );
+      }
+    }
   }
 
   return {

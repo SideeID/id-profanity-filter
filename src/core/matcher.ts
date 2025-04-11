@@ -13,6 +13,21 @@ import {
   findProfanityByLevenshteinDistance,
 } from "../utils/similarityUtils";
 import { DEFAULT_OPTIONS } from "../config/options";
+import { AhoCorasick } from "../utils/ahoCorasick";
+
+const globalAhoCorasick = new AhoCorasick();
+let ahoCorasickInitialized = false;
+
+function initializeAhoCorasick(words: string[]) {
+  if (ahoCorasickInitialized) return;
+
+  for (const word of words) {
+    globalAhoCorasick.addPattern(word);
+  }
+
+  globalAhoCorasick.build();
+  ahoCorasickInitialized = true;
+}
 
 interface FindProfanityFunction {
   (text: string, options?: FilterOptions): string[];
@@ -85,27 +100,19 @@ export function findProfanity(
   const matches = new Set<string>();
   const actualMatches = new Map<string, string[]>();
 
-  wordsToCheck.forEach((word) => {
-    const regex = createWordRegex(word, {
-      wholeWord: !checkSubstring,
-      caseSensitive: false,
-      leetSpeak: false,
-      detectSplit: false,
-      indonesianVariation: false,
-    });
+  initializeAhoCorasick(wordsToCheck);
 
-    let match;
-    while ((match = regex.exec(normalizedText)) !== null) {
-      const originalWord =
-        aliasMap.get(word.toLowerCase()) || word.toLowerCase();
-      matches.add(originalWord);
+  const basicMatches = globalAhoCorasick.searchUnique(normalizedText);
+  for (const match of basicMatches) {
+    const originalWord =
+      aliasMap.get(match.toLowerCase()) || match.toLowerCase();
+    matches.add(originalWord);
 
-      if (!actualMatches.has(originalWord)) {
-        actualMatches.set(originalWord, []);
-      }
-      actualMatches.get(originalWord)?.push(match[0]);
+    if (!actualMatches.has(originalWord)) {
+      actualMatches.set(originalWord, []);
     }
-  });
+    actualMatches.get(originalWord)?.push(match);
+  }
 
   if (detectLeetSpeak) {
     wordsToCheck.forEach((word) => {

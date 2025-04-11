@@ -198,11 +198,21 @@ export function clusterSimilarWords(
 
 /**
  * Cari kata-kata kotor yang mungkin dari teks menggunakan kesamaan string
+ * dengan optimasi untuk mengurangi kompleksitas
  *
  * @param text Teks yang akan diperiksa
  * @param profanityWords Daftar kata kotor
  * @param threshold Batas minimum kesamaan (default: 0.8)
  * @returns Array kata yang mungkin merupakan kata kotor
+ */
+/**
+ * Cari kata-kata kotor yang mungkin dari teks berdasarkan kemiripan string
+ * dengan optimasi biar prosesnya nggak terlalu berat
+ *
+ * @param text Teks yang mau dicek
+ * @param profanityWords Daftar kata-kata kotor/kasar
+ * @param threshold Batas minimal kemiripan (default: 0.8)
+ * @returns Array kata yang kemungkinan kata kotor/kasar
  */
 export function findPossibleProfanityBySimiliarity(
   text: string,
@@ -212,22 +222,73 @@ export function findPossibleProfanityBySimiliarity(
   const result: Array<{ word: string; original: string; similarity: number }> =
     [];
 
+  // Optimasi dengan bikin map kata-kata kotor berdasarkan huruf pertama
+  const profanityMap = new Map<string, string[]>();
+
+  // Kelompokkan kata-kata kotor berdasarkan huruf pertama biar pencariannya lebih cepat
+  for (const word of profanityWords) {
+    if (word.length < 1) continue;
+
+    const firstChar = word[0].toLowerCase();
+    if (!profanityMap.has(firstChar)) {
+      profanityMap.set(firstChar, []);
+    }
+    profanityMap.get(firstChar)!.push(word);
+  }
+
   const words = text.toLowerCase().split(/\s+/);
 
   for (const word of words) {
     if (word.length < 3) continue;
 
-    for (const profanity of profanityWords) {
+    // Cuma bandingin dengan kata-kata kotor yang huruf pertamanya sama
+    // atau yang perbedaan panjangnya masih masuk akal
+    const firstChar = word[0];
+    const candidateWords = profanityMap.get(firstChar) || [];
+
+    // Cek juga huruf-huruf yang berdekatan (buat antisipasi typo di huruf pertama)
+    // Ini opsional tapi bikin deteksinya lebih bagus
+    const charCode = firstChar.charCodeAt(0);
+    const prevChar = String.fromCharCode(charCode - 1);
+    const nextChar = String.fromCharCode(charCode + 1);
+
+    const adjacentCandidates = [
+      ...(profanityMap.get(prevChar) || []),
+      ...(profanityMap.get(nextChar) || []),
+    ];
+
+    // Gabungin kandidat-kandidatnya, prioritasin yang huruf pertamanya sama persis
+    const allCandidates = [...candidateWords, ...adjacentCandidates];
+
+    // Filter kandidat berdasarkan perbedaan panjang sebelum ngitung kemiripannya
+    const lengthFilteredCandidates = allCandidates.filter(
+      (candidate) => Math.abs(candidate.length - word.length) <= 2,
+    );
+
+    // Cari yang paling cocok
+    let bestMatch: {
+      word: string;
+      original: string;
+      similarity: number;
+    } | null = null;
+
+    for (const profanity of lengthFilteredCandidates) {
       const similarity = stringSimilarity(word, profanity);
 
-      if (similarity >= threshold) {
-        result.push({
+      if (
+        similarity >= threshold &&
+        (!bestMatch || similarity > bestMatch.similarity)
+      ) {
+        bestMatch = {
           word,
           original: profanity,
           similarity,
-        });
-        break;
+        };
       }
+    }
+
+    if (bestMatch) {
+      result.push(bestMatch);
     }
   }
 
@@ -261,30 +322,106 @@ export function findProfanityByLevenshteinDistance(
     distance: number;
   }> = [];
 
+  // map kata-kata kotor dikelompokkan sesuai panjangnya
+  const profanityByLength = new Map<number, string[]>();
+
+  // Kelompokkin kata-kata kotor berdasarkan panjangnya biar pencarian lebih cepat
+  for (const word of profanityWords) {
+    const length = word.length;
+    if (!profanityByLength.has(length)) {
+      profanityByLength.set(length, []);
+    }
+    profanityByLength.get(length)!.push(word);
+  }
+
   const words = text.toLowerCase().split(/\s+/);
 
   for (const word of words) {
     if (word.length < 3) continue;
 
-    for (const profanity of profanityWords) {
-      if (Math.abs(word.length - profanity.length) > maxDistance) continue;
+    let bestMatch: {
+      word: string;
+      original: string;
+      similarity: number;
+      distance: number;
+    } | null = null;
 
-      const distance = levenshteinDistance(word, profanity);
-      if (distance <= maxDistance) {
-        const similarity = stringSimilarity(word, profanity);
+    for (
+      let len = Math.max(3, word.length - maxDistance);
+      len <= word.length + maxDistance;
+      len++
+    ) {
+      const candidates = profanityByLength.get(len) || [];
 
-        if (similarity >= threshold) {
-          result.push({
-            word,
-            original: profanity,
-            similarity,
-            distance,
-          });
-          break;
+      for (const profanity of candidates) {
+        if (!isCharacterCountSimilar(word, profanity, maxDistance)) {
+          continue;
+        }
+
+        const distance = levenshteinDistance(word, profanity);
+
+        if (distance <= maxDistance) {
+          const similarity =
+            1 - distance / Math.max(word.length, profanity.length);
+
+          if (
+            similarity >= threshold &&
+            (!bestMatch || similarity > bestMatch.similarity)
+          ) {
+            bestMatch = {
+              word,
+              original: profanity,
+              similarity,
+              distance,
+            };
+
+            if (distance === 0 || similarity > 0.95) {
+              break;
+            }
+          }
         }
       }
+    }
+
+    if (bestMatch) {
+      result.push(bestMatch);
     }
   }
 
   return result;
+}
+
+/**
+ * Helper function to efficiently check if character counts between two strings
+ * are similar enough to warrant a full Levenshtein calculation
+ */
+function isCharacterCountSimilar(
+  str1: string,
+  str2: string,
+  maxDifference: number,
+): boolean {
+  const charCount1: Record<string, number> = {};
+  const charCount2: Record<string, number> = {};
+
+  for (const char of str1) {
+    charCount1[char] = (charCount1[char] || 0) + 1;
+  }
+
+  for (const char of str2) {
+    charCount2[char] = (charCount2[char] || 0) + 1;
+  }
+
+  let diffCount = 0;
+
+  for (const char in charCount1) {
+    diffCount += Math.abs((charCount1[char] || 0) - (charCount2[char] || 0));
+  }
+
+  for (const char in charCount2) {
+    if (!charCount1[char]) {
+      diffCount += charCount2[char];
+    }
+  }
+
+  return diffCount <= maxDifference * 2;
 }
