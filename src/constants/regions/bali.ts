@@ -1,0 +1,168 @@
+import { ProfanityWord } from "../../types";
+
+export const bali: ProfanityWord[] = [
+  {
+    word: 'cicing',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.7,
+    aliases: [],
+    description: 'Secara harfiah berarti anjing',
+    context:
+      'Umpatan umum di Bali untuk menyebut orang yang dianggap hina atau tidak berguna',
+  },
+  {
+    word: 'kéto',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: ['keto'],
+    description: 'Secara harfiah berarti monyet',
+    context:
+      'Umpatan untuk menyebut orang yang dianggap bodoh, nakal, atau tidak sopan',
+  },
+  {
+    word: 'batek',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.5,
+    aliases: [],
+    description: 'Berarti bodoh atau dungu',
+    context: 'Umpatan ringan untuk menyebut seseorang yang kurang pintar',
+  },
+  {
+    word: 'dongkah',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: [],
+    description: 'Berarti keras kepala atau bebal',
+    context: 'Umpatan untuk menyebut orang yang sulit dinasihati',
+  },
+  {
+    word: 'bengkung',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.5,
+    aliases: [],
+    description:
+      'Berarti bengkok atau tidak lurus (juga bisa berarti tidak jujur)',
+    context:
+      'Umpatan ringan untuk menyebut orang yang tidak jujur atau berkelakuan buruk',
+  },
+  {
+    word: 'slebor',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.4,
+    aliases: [],
+    description: 'Berarti ceroboh atau teledor',
+    context: 'Umpatan ringan untuk menyebut orang yang tidak hati-hati',
+  },
+  {
+    word: 'kocol',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.5,
+    aliases: [],
+    description: 'Berarti kosong atau tidak berisi (otaknya)',
+    context: 'Umpatan ringan untuk menyebut orang yang dianggap tidak pintar',
+  },
+  {
+    word: 'bedégul',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: [],
+    description: 'Berarti bodoh sekali',
+    context: 'Umpatan yang lebih kuat untuk menyebut orang yang sangat bodoh',
+  },
+  {
+    word: 'gedebeg',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.5,
+    aliases: [],
+    description: 'Berarti besar dan bodoh (kasar)',
+    context:
+      'Umpatan untuk menyebut orang yang berbadan besar tapi tidak pintar',
+  },
+  {
+    word: 'belog',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: [],
+    description: 'Berarti bodoh',
+    context: 'Umpatan umum untuk menyebut seseorang yang tidak pintar',
+  },
+  {
+    word: 'ngamah cicing',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.7,
+    aliases: [],
+    description: 'Secara harfiah berarti makan anjing (kasar)',
+    context: 'Umpatan kasar untuk menghina atau merendahkan seseorang',
+  },
+  {
+    word: 'nyama cicing',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: [],
+    description: 'Secara harfiah berarti saudara anjing (kasar)',
+    context: 'Umpatan kasar untuk menghina keluarga seseorang',
+  },
+  {
+    word: 'awak cicing',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: [],
+    description: 'Secara harfiah berarti badan anjing (kasar)',
+    context: 'Umpatan kasar untuk menghina fisik atau kelakuan seseorang',
+  },
+  {
+    word: 'rai cicing',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.6,
+    aliases: [],
+    description: 'Secara harfiah berarti muka anjing (kasar)',
+    context: 'Umpatan kasar untuk menghina wajah seseorang',
+  },
+  {
+    word: 'kulkul',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.5,
+    aliases: [],
+    description:
+      'Merujuk pada alat komunikasi tradisional (bedug), bisa berarti lambat berpikir',
+    context: 'Umpatan ringan untuk menyebut orang yang lambat memahami sesuatu',
+  },
+  {
+    word: 'pocol',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.4,
+    aliases: [],
+    description: 'Berarti tidak berguna atau sia-sia',
+    context:
+      'Umpatan ringan untuk menyebut sesuatu yang tidak bermanfaat atau orang yang tidak berguna',
+  },
+  {
+    word: 'béto',
+    category: 'insult',
+    region: 'bali',
+    severity: 0.5,
+    aliases: [],
+    description: 'Berarti bodoh (lebih halus dari belog)',
+    context: 'Umpatan ringan untuk menyebut seseorang yang kurang pintar',
+  },
+];
+
+export const baliWords = bali.map((item) => item.word);
+
+export default bali;
