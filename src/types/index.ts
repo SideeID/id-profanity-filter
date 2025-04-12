@@ -1,31 +1,32 @@
 export type ProfanityCategory =
-  | "sexual"
-  | "insult"
-  | "profanity"
-  | "slur"
-  | "drugs"
-  | "disgusting"
-  | "blasphemy";
+  | 'sexual'
+  | 'insult'
+  | 'profanity'
+  | 'slur'
+  | 'drugs'
+  | 'disgusting'
+  | 'blasphemy';
 
 export type Region =
-  | "general"
-  | "jawa"
-  | "sunda"
-  | "betawi"
-  | "batak"
-  | "minang"
-  | "bali"
-  | "madura"
-  | "bugis"
-  | "aceh"
-  | "ambon"
-  | "papua"
-  | "manado"
-  | "banjar"
-  | "palembang"
-  | "lampung"
-  | "ntt"
-  | "ntb";
+  | 'general'
+  | 'jawa'
+  | 'sunda'
+  | 'betawi'
+  | 'batak'
+  | 'minang'
+  | 'bali'
+  | 'madura'
+  | 'bugis'
+  | 'aceh'
+  | 'ambon'
+  | 'papua'
+  | 'manado'
+  | 'banjar'
+  | 'palembang'
+  | 'lampung'
+  | 'ntt'
+  | 'mandailing'
+  | 'ntb';
 
 export interface ProfanityWord {
   word: string;
