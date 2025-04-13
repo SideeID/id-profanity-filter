@@ -3,12 +3,14 @@ import { general } from "../regions/general";
 import { jawa } from "../regions/jawa";
 import { sunda } from "../regions/sunda";
 import { betawi } from "../regions/betawi";
+import minang from "../regions/minang";
 
 export const sexual: ProfanityWord[] = [
   ...general.filter((word) => word.category === "sexual"),
   ...jawa.filter((word) => word.category === "sexual"),
   ...sunda.filter((word) => word.category === "sexual"),
   ...betawi.filter((word) => word.category === "sexual"),
+  ...minang.filter((word) => word.category === "sexual"),
   {
     word: "bokep",
     category: "sexual",

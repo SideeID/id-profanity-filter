@@ -3,12 +3,14 @@ import { general } from "../regions/general";
 import { jawa } from "../regions/jawa";
 import { sunda } from "../regions/sunda";
 import { betawi } from "../regions/betawi";
+import minang from "../regions/minang";
 
 export const disgusting: ProfanityWord[] = [
   ...general.filter((word) => word.category === "disgusting"),
   ...jawa.filter((word) => word.category === "disgusting"),
   ...sunda.filter((word) => word.category === "disgusting"),
   ...betawi.filter((word) => word.category === "disgusting"),
+  ...minang.filter((word) => word.category === "disgusting"),
 
   {
     word: "muntah",
