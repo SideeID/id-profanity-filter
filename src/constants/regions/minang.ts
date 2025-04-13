@@ -6,7 +6,7 @@ export const minang: ProfanityWord[] = [
     category: 'insult',
     region: 'minang',
     severity: 1,
-    aliases: ['pantak','kalera'],
+    aliases: ['pantak', 'kalera'],
     description: 'Secara harfiah berarti "kelamin pria',
     context: 'Digunakan ketika kesal dan mengumpat ke sesorang',
   },
@@ -48,6 +48,6 @@ export const minang: ProfanityWord[] = [
   },
 ];
 
-export const maduraWords = minang.map((item) => item.word);
+export const minangWords = minang.map((item) => item.word);
 
 export default minang;
