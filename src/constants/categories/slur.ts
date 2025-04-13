@@ -4,6 +4,10 @@ import { jawa } from '../regions/jawa';
 import { sunda } from '../regions/sunda';
 import { betawi } from '../regions/betawi';
 import minang from '../regions/minang';
+import madura from '../regions/madura';
+import aceh from '../regions/aceh';
+import bali from '../regions/bali';
+import batak from '../regions/batak';
 
 export const slur: ProfanityWord[] = [
   ...general.filter((word) => word.category === 'slur'),
@@ -11,6 +15,11 @@ export const slur: ProfanityWord[] = [
   ...sunda.filter((word) => word.category === 'slur'),
   ...betawi.filter((word) => word.category === 'slur'),
   ...minang.filter((word) => word.category === 'slur'),
+  ...madura.filter((word) => word.category === 'slur'),
+  ...sunda.filter((word) => word.category === 'slur'),
+  ...aceh.filter((word) => word.category === 'slur'),
+  ...bali.filter((word) => word.category === 'slur'),
+  ...batak.filter((word) => word.category === 'slur'),
 
   {
     word: 'cina',

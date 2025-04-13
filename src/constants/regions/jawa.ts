@@ -52,10 +52,8 @@ export const jawa: ProfanityWord[] = [
     region: 'jawa',
     severity: 0.5,
     aliases: ['mripat mu', 'matane'],
-    description:
-      'Secara harfiah berarti matamu, digunakan sebagai umpatan ringan',
-    context:
-      'Umpatan ringan untuk menanggapi sesuatu yang dianggap tidak benar',
+    description: 'Secara harfiah berarti matamu, digunakan sebagai umpatan ringan',
+    context: 'Umpatan ringan untuk menanggapi sesuatu yang dianggap tidak benar',
   },
   {
     word: 'mbokne ancok',
@@ -99,10 +97,8 @@ export const jawa: ProfanityWord[] = [
     region: 'jawa',
     severity: 0.5,
     aliases: ['ndas mu', 'dhasmu'],
-    description:
-      'Secara harfiah berarti kepalamu, digunakan sebagai umpatan ringan',
-    context:
-      'Umpatan ringan untuk menanggapi sesuatu yang dianggap tidak benar',
+    description: 'Secara harfiah berarti kepalamu, digunakan sebagai umpatan ringan',
+    context: 'Umpatan ringan untuk menanggapi sesuatu yang dianggap tidak benar',
   },
   {
     word: 'kontol',
@@ -154,15 +150,7 @@ export const jawa: ProfanityWord[] = [
     category: 'insult',
     region: 'jawa',
     severity: 0.7,
-    aliases: [
-      'bajilak',
-      'bajhingan',
-      'bajingak',
-      'bajingseng',
-      'bajindul',
-      'bajigur',
-      'jingan',
-    ],
+    aliases: ['bajilak', 'bajhingan', 'bajingak', 'bajingseng', 'bajindul', 'bajigur', 'jingan'],
     description: 'Sebutan untuk orang yang dianggap jahat atau tidak bermoral',
     context: 'Umpatan untuk mengekspresikan kemarahan atau kekesalan',
   },
@@ -226,8 +214,7 @@ export const jawa: ProfanityWord[] = [
     region: 'jawa',
     severity: 0.6,
     aliases: ['ndelodok', 'ndlodok'],
-    description:
-      'Mengacu pada tindakan yang dianggap bodoh atau tidak masuk akal',
+    description: 'Mengacu pada tindakan yang dianggap bodoh atau tidak masuk akal',
     context: 'Hinaan untuk mengkritik tindakan seseorang',
   },
   {
@@ -336,8 +323,7 @@ export const jawa: ProfanityWord[] = [
     severity: 0.4,
     aliases: ['ndesa', 'deso'],
     description: 'Secara harfiah berarti dari desa atau kampungan',
-    context:
-      'Hinaan untuk orang yang dianggap kurang modern atau berpendidikan',
+    context: 'Hinaan untuk orang yang dianggap kurang modern atau berpendidikan',
   },
   {
     word: 'kere',
@@ -354,8 +340,7 @@ export const jawa: ProfanityWord[] = [
     region: 'jawa',
     severity: 0.9,
     aliases: ['itl', 'itul'],
-    description:
-      'Kata vulgar yang mengacu pada bagian dari alat kelamin perempuan',
+    description: 'Kata vulgar yang mengacu pada bagian dari alat kelamin perempuan',
     context: 'Kata vulgar yang merujuk pada anatomi seksual',
   },
   {
@@ -365,8 +350,7 @@ export const jawa: ProfanityWord[] = [
     severity: 0.6,
     aliases: ['bodo', 'bloon'],
     description: 'Secara harfiah berarti bodoh',
-    context:
-      'Hinaan untuk menyebut seseorang yang kurang pintar atau tidak mengerti',
+    context: 'Hinaan untuk menyebut seseorang yang kurang pintar atau tidak mengerti',
   },
   {
     word: 'doblok',
@@ -438,8 +422,7 @@ export const jawa: ProfanityWord[] = [
     severity: 0.6,
     aliases: ['syetan'],
     description: 'Secara harfiah berarti setan',
-    context:
-      'Umpatan untuk menunjukkan kekesalan atau menyebut orang yang nakal',
+    context: 'Umpatan untuk menunjukkan kekesalan atau menyebut orang yang nakal',
   },
   {
     word: 'blawur',
@@ -448,8 +431,7 @@ export const jawa: ProfanityWord[] = [
     severity: 0.4,
     aliases: [],
     description: 'Menggambarkan kondisi yang tidak jelas atau linglung',
-    context:
-      'Umpatan ringan untuk menyebut orang yang bingung atau tidak fokus',
+    context: 'Umpatan ringan untuk menyebut orang yang bingung atau tidak fokus',
   },
   {
     word: 'kemproh',

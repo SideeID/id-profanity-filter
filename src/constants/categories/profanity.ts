@@ -3,13 +3,23 @@ import { general } from '../regions/general';
 import { jawa } from '../regions/jawa';
 import { sunda } from '../regions/sunda';
 import { betawi } from '../regions/betawi';
+import minang from '../regions/minang';
+import madura from '../regions/madura';
+import aceh from '../regions/aceh';
+import bali from '../regions/bali';
+import batak from '../regions/batak';
 
 export const profanity: ProfanityWord[] = [
   ...general.filter((word) => word.category === 'profanity'),
   ...jawa.filter((word) => word.category === 'profanity'),
   ...sunda.filter((word) => word.category === 'profanity'),
   ...betawi.filter((word) => word.category === 'profanity'),
-  ...betawi.filter((word) => word.category === 'profanity'),
+  ...minang.filter((word) => word.category === 'profanity'),
+  ...madura.filter((word) => word.category === 'profanity'),
+  ...sunda.filter((word) => word.category === 'profanity'),
+  ...aceh.filter((word) => word.category === 'profanity'),
+  ...bali.filter((word) => word.category === 'profanity'),
+  ...batak.filter((word) => word.category === 'profanity'),
 
   {
     word: 'anjing',

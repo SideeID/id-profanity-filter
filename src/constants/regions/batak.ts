@@ -1,4 +1,4 @@
-import { ProfanityWord } from "../../types";
+import { ProfanityWord } from '../../types';
 
 export const batak: ProfanityWord[] = [
   {
@@ -17,8 +17,7 @@ export const batak: ProfanityWord[] = [
     severity: 0.7,
     aliases: [],
     description: "Secara harfiah berarti 'tidak berguna' atau 'sia-sia'",
-    context:
-      'Umpatan kasar untuk menyebut orang yang dianggap tidak berguna atau tidak becus.',
+    context: 'Umpatan kasar untuk menyebut orang yang dianggap tidak berguna atau tidak becus.',
   },
   {
     word: 'puki mak',
@@ -117,8 +116,7 @@ export const batak: ProfanityWord[] = [
     severity: 0.5,
     aliases: [],
     description: 'Berarti orang yang suka bicara omong kosong atau tidak jelas',
-    context:
-      'Umpatan ringan untuk menyebut orang yang perkataannya tidak bisa dipercaya.',
+    context: 'Umpatan ringan untuk menyebut orang yang perkataannya tidak bisa dipercaya.',
   },
   {
     word: 'songon babiat',
@@ -127,8 +125,7 @@ export const batak: ProfanityWord[] = [
     severity: 0.7,
     aliases: [],
     description: 'Secara harfiah berarti seperti binatang buas (kasar)',
-    context:
-      'Umpatan kasar untuk menyebut orang yang kelakuannya buruk atau liar.',
+    context: 'Umpatan kasar untuk menyebut orang yang kelakuannya buruk atau liar.',
   },
   {
     word: 'hau buluk',
@@ -136,8 +133,7 @@ export const batak: ProfanityWord[] = [
     region: 'batak',
     severity: 0.6,
     aliases: [],
-    description:
-      'Secara harfiah berarti pohon lapuk (kiasan untuk tidak berguna)',
+    description: 'Secara harfiah berarti pohon lapuk (kiasan untuk tidak berguna)',
     context: 'Umpatan untuk menyebut orang yang dianggap tidak berguna.',
   },
 ];

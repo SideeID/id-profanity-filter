@@ -36,7 +36,7 @@ export function levenshteinDistance(str1: string, str2: string): number {
       matrix[i][j] = Math.min(
         matrix[i - 1][j] + 1, // deletion
         matrix[i][j - 1] + 1, // insertion
-        matrix[i - 1][j - 1] + cost, // substitution
+        matrix[i - 1][j - 1] + cost // substitution
       );
     }
   }
@@ -72,7 +72,7 @@ export function stringSimilarity(str1: string, str2: string): number {
 export function findMostSimilar(
   target: string,
   candidates: string[],
-  threshold: number = 0.7,
+  threshold: number = 0.7
 ): string | null {
   if (!candidates.length) return null;
 
@@ -104,7 +104,7 @@ export function findMostSimilarWithLevenshtein(
   target: string,
   candidates: string[],
   threshold: number = 0.7,
-  maxDistance: number = 3,
+  maxDistance: number = 3
 ): string | null {
   if (!candidates.length) return null;
 
@@ -145,7 +145,7 @@ export function findMostSimilarWithLevenshtein(
 export function isPossibleProfanityVariation(
   input: string,
   profanityWords: string[],
-  threshold: number = 0.75,
+  threshold: number = 0.75
 ): [boolean, string | null] {
   if (!input || !profanityWords.length) return [false, null];
 
@@ -167,10 +167,7 @@ export function isPossibleProfanityVariation(
  * @param threshold Batas minimum kesamaan (default: 0.8)
  * @returns Array kluster kata yang mirip
  */
-export function clusterSimilarWords(
-  words: string[],
-  threshold: number = 0.8,
-): string[][] {
+export function clusterSimilarWords(words: string[], threshold: number = 0.8): string[][] {
   const clusters: string[][] = [];
   const processed: Set<string> = new Set();
 
@@ -217,10 +214,9 @@ export function clusterSimilarWords(
 export function findPossibleProfanityBySimiliarity(
   text: string,
   profanityWords: string[],
-  threshold: number = 0.8,
+  threshold: number = 0.8
 ): Array<{ word: string; original: string; similarity: number }> {
-  const result: Array<{ word: string; original: string; similarity: number }> =
-    [];
+  const result: Array<{ word: string; original: string; similarity: number }> = [];
 
   // Optimasi dengan bikin map kata-kata kotor berdasarkan huruf pertama
   const profanityMap = new Map<string, string[]>();
@@ -262,7 +258,7 @@ export function findPossibleProfanityBySimiliarity(
 
     // Filter kandidat berdasarkan perbedaan panjang sebelum ngitung kemiripannya
     const lengthFilteredCandidates = allCandidates.filter(
-      (candidate) => Math.abs(candidate.length - word.length) <= 2,
+      (candidate) => Math.abs(candidate.length - word.length) <= 2
     );
 
     // Cari yang paling cocok
@@ -275,10 +271,7 @@ export function findPossibleProfanityBySimiliarity(
     for (const profanity of lengthFilteredCandidates) {
       const similarity = stringSimilarity(word, profanity);
 
-      if (
-        similarity >= threshold &&
-        (!bestMatch || similarity > bestMatch.similarity)
-      ) {
+      if (similarity >= threshold && (!bestMatch || similarity > bestMatch.similarity)) {
         bestMatch = {
           word,
           original: profanity,
@@ -308,7 +301,7 @@ export function findProfanityByLevenshteinDistance(
   text: string,
   profanityWords: string[],
   threshold: number = 0.8,
-  maxDistance: number = 2,
+  maxDistance: number = 2
 ): Array<{
   word: string;
   original: string;
@@ -361,13 +354,9 @@ export function findProfanityByLevenshteinDistance(
         const distance = levenshteinDistance(word, profanity);
 
         if (distance <= maxDistance) {
-          const similarity =
-            1 - distance / Math.max(word.length, profanity.length);
+          const similarity = 1 - distance / Math.max(word.length, profanity.length);
 
-          if (
-            similarity >= threshold &&
-            (!bestMatch || similarity > bestMatch.similarity)
-          ) {
+          if (similarity >= threshold && (!bestMatch || similarity > bestMatch.similarity)) {
             bestMatch = {
               word,
               original: profanity,
@@ -395,11 +384,7 @@ export function findProfanityByLevenshteinDistance(
  * Helper function to efficiently check if character counts between two strings
  * are similar enough to warrant a full Levenshtein calculation
  */
-function isCharacterCountSimilar(
-  str1: string,
-  str2: string,
-  maxDifference: number,
-): boolean {
+function isCharacterCountSimilar(str1: string, str2: string, maxDifference: number): boolean {
   const charCount1: Record<string, number> = {};
   const charCount2: Record<string, number> = {};
 
