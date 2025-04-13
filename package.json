@@ -1,6 +1,6 @@
 {
   "name": "@sideid/id-profanity-filter",
-  "version": "1.11.8",
+  "version": "1.11.9",
   "description": "Library filter kata kotor dalam Bahasa Indonesia",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -47,8 +47,5 @@
     "ts-jest": "^29.3.1",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "@sideid/id-profanity-filter": "file:"
   }
 }
