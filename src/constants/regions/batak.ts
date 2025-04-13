@@ -17,11 +17,7 @@ export const batak: ProfanityWord[] = [
     severity: 0.7,
     aliases: [],
     description: "Secara harfiah berarti 'tidak berguna' atau 'sia-sia'",
-<<<<<<< Updated upstream
-    context: 'Umpatan kasar untuk menyebut orang yang dianggap tidak berguna atau tidak becus.',
-=======
-    context: "Umpatan kasar untuk menyebut orang yang dianggap tidak berguna atau tidak becus.",
->>>>>>> Stashed changes
+    context: 'Umpatan kasar untuk menyebut orang yang dianggap tidak berguna atau tidak becus.',  
   },
   {
     word: "puki mak",
@@ -119,13 +115,8 @@ export const batak: ProfanityWord[] = [
     region: "batak",
     severity: 0.5,
     aliases: [],
-<<<<<<< Updated upstream
-    description: 'Berarti orang yang suka bicara omong kosong atau tidak jelas',
-    context: 'Umpatan ringan untuk menyebut orang yang perkataannya tidak bisa dipercaya.',
-=======
     description: "Berarti orang yang suka bicara omong kosong atau tidak jelas",
     context: "Umpatan ringan untuk menyebut orang yang perkataannya tidak bisa dipercaya.",
->>>>>>> Stashed changes
   },
   {
     word: "loak",
@@ -142,13 +133,8 @@ export const batak: ProfanityWord[] = [
     region: "batak",
     severity: 0.7,
     aliases: [],
-<<<<<<< Updated upstream
     description: 'Secara harfiah berarti seperti binatang buas (kasar)',
     context: 'Umpatan kasar untuk menyebut orang yang kelakuannya buruk atau liar.',
-=======
-    description: "Secara harfiah berarti seperti binatang buas (kasar)",
-    context: "Umpatan kasar untuk menyebut orang yang kelakuannya buruk atau liar.",
->>>>>>> Stashed changes
   },
   {
     word: "hau buluk",
@@ -156,13 +142,8 @@ export const batak: ProfanityWord[] = [
     region: "batak",
     severity: 0.6,
     aliases: [],
-<<<<<<< Updated upstream
     description: 'Secara harfiah berarti pohon lapuk (kiasan untuk tidak berguna)',
     context: 'Umpatan untuk menyebut orang yang dianggap tidak berguna.',
-=======
-    description: "Secara harfiah berarti pohon lapuk (kiasan untuk tidak berguna)",
-    context: "Umpatan untuk menyebut orang yang dianggap tidak berguna.",
->>>>>>> Stashed changes
   },
   {
     word: "bujang inam",
