@@ -196,8 +196,7 @@ export const sunda: ProfanityWord[] = [
     region: 'sunda',
     severity: 0.6,
     aliases: ['peot hulu'],
-    description:
-      "Akronim dari 'peot hulu', menghina seseorang tidak punya otak",
+    description: "Akronim dari 'peot hulu', menghina seseorang tidak punya otak",
     context: 'Digunakan untuk menghina kecerdasan seseorang',
   },
   {
@@ -306,8 +305,7 @@ export const sunda: ProfanityWord[] = [
     severity: 0.4,
     aliases: [],
     description: 'Kata kasar untuk tangan',
-    context:
-      'Digunakan untuk memarahi orang yang tidak sopan menggunakan tangan',
+    context: 'Digunakan untuk memarahi orang yang tidak sopan menggunakan tangan',
   },
   {
     word: 'cokor',

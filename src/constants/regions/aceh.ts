@@ -17,8 +17,7 @@ export const aceh: ProfanityWord[] = [
     severity: 0.6,
     aliases: [],
     description: 'Secara harfiah berarti babi',
-    context:
-      'Umpatan untuk menyebut orang yang dianggap kotor, rakus, atau tidak berakhlak',
+    context: 'Umpatan untuk menyebut orang yang dianggap kotor, rakus, atau tidak berakhlak',
   },
   {
     word: 'asèe',
@@ -27,8 +26,7 @@ export const aceh: ProfanityWord[] = [
     severity: 0.6,
     aliases: ['asee'],
     description: 'Secara harfiah berarti anjing',
-    context:
-      'Umpatan untuk menyebut orang yang dianggap hina atau tidak berguna',
+    context: 'Umpatan untuk menyebut orang yang dianggap hina atau tidak berguna',
   },
   {
     word: 'haramjadah',
@@ -36,10 +34,8 @@ export const aceh: ProfanityWord[] = [
     region: 'aceh',
     severity: 0.8,
     aliases: [],
-    description:
-      'Berarti kurang ajar atau anak haram (lebih halus dari aneuk bajeung)',
-    context:
-      'Umpatan kasar untuk menyebut anak yang tidak sopan atau tidak beradab',
+    description: 'Berarti kurang ajar atau anak haram (lebih halus dari aneuk bajeung)',
+    context: 'Umpatan kasar untuk menyebut anak yang tidak sopan atau tidak beradab',
   },
   {
     word: "pa'ak",

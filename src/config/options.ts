@@ -1,7 +1,7 @@
-import { FilterOptions, ProfanityCategory, Region } from "../types";
+import { FilterOptions, ProfanityCategory, Region } from '../types';
 
 export const DEFAULT_OPTIONS: FilterOptions = {
-  replaceWith: "*",
+  replaceWith: '*',
   fullWordCensor: true,
   detectLeetSpeak: true,
   checkSubstring: false,
@@ -27,7 +27,7 @@ export const FILTER_PRESETS = {
   light: {
     ...DEFAULT_OPTIONS,
     severityThreshold: 0.7,
-    categories: ["sexual", "slur", "blasphemy"] as ProfanityCategory[],
+    categories: ['sexual', 'slur', 'blasphemy'] as ProfanityCategory[],
   },
 
   childSafe: {
@@ -42,57 +42,57 @@ export const FILTER_PRESETS = {
 export const CATEGORY_PRESETS = {
   sexual: {
     ...DEFAULT_OPTIONS,
-    categories: ["sexual"] as ProfanityCategory[],
+    categories: ['sexual'] as ProfanityCategory[],
   },
 
   insults: {
     ...DEFAULT_OPTIONS,
-    categories: ["insult"] as ProfanityCategory[],
+    categories: ['insult'] as ProfanityCategory[],
   },
 
   profanity: {
     ...DEFAULT_OPTIONS,
-    categories: ["profanity"] as ProfanityCategory[],
+    categories: ['profanity'] as ProfanityCategory[],
   },
 };
 
 export const REGION_PRESETS = {
   general: {
     ...DEFAULT_OPTIONS,
-    regions: ["general"] as Region[],
+    regions: ['general'] as Region[],
   },
 
   jawa: {
     ...DEFAULT_OPTIONS,
-    regions: ["jawa"] as Region[],
+    regions: ['jawa'] as Region[],
   },
 
   sunda: {
     ...DEFAULT_OPTIONS,
-    regions: ["sunda"] as Region[],
+    regions: ['sunda'] as Region[],
   },
 
   betawi: {
     ...DEFAULT_OPTIONS,
-    regions: ["betawi"] as Region[],
+    regions: ['betawi'] as Region[],
   },
 
   batak: {
     ...DEFAULT_OPTIONS,
-    regions: ["batak"] as Region[],
+    regions: ['batak'] as Region[],
   },
 };
 
 export const REPLACEMENT_CHARS = {
-  asterisk: "*",
-  hash: "#",
-  dollar: "$",
-  at: "@",
-  percent: "%",
-  underscore: "_",
-  dash: "-",
-  dot: ".",
-  grawlix: "#@$%&!",
+  asterisk: '*',
+  hash: '#',
+  dollar: '$',
+  at: '@',
+  percent: '%',
+  underscore: '_',
+  dash: '-',
+  dot: '.',
+  grawlix: '#@$%&!',
 };
 
 /**
@@ -101,9 +101,7 @@ export const REPLACEMENT_CHARS = {
  * @param options Opsi yang akan digabungkan dengan default
  * @returns Opsi yang sudah digabungkan
  */
-export function createOptions(
-  options: Partial<FilterOptions> = {},
-): FilterOptions {
+export function createOptions(options: Partial<FilterOptions> = {}): FilterOptions {
   return {
     ...DEFAULT_OPTIONS,
     ...options,
@@ -119,15 +117,14 @@ export function createOptions(
  */
 export function getPresetOptions(
   presetName: string,
-  additionalOptions: Partial<FilterOptions> = {},
+  additionalOptions: Partial<FilterOptions> = {}
 ): FilterOptions {
   let presetOptions: FilterOptions;
 
   if (presetName in FILTER_PRESETS) {
     presetOptions = FILTER_PRESETS[presetName as keyof typeof FILTER_PRESETS];
   } else if (presetName in CATEGORY_PRESETS) {
-    presetOptions =
-      CATEGORY_PRESETS[presetName as keyof typeof CATEGORY_PRESETS];
+    presetOptions = CATEGORY_PRESETS[presetName as keyof typeof CATEGORY_PRESETS];
   } else if (presetName in REGION_PRESETS) {
     presetOptions = REGION_PRESETS[presetName as keyof typeof REGION_PRESETS];
   } else {
@@ -146,9 +143,7 @@ export function getPresetOptions(
  * @param type Tipe karakter pengganti
  * @returns Karakter pengganti
  */
-export function getReplacementChar(
-  type: keyof typeof REPLACEMENT_CHARS = "asterisk",
-): string {
+export function getReplacementChar(type: keyof typeof REPLACEMENT_CHARS = 'asterisk'): string {
   return REPLACEMENT_CHARS[type] || REPLACEMENT_CHARS.asterisk;
 }
 
@@ -169,7 +164,7 @@ export function getRandomGrawlix(): string {
  * @returns String pengganti
  */
 export function makeRandomGrawlixString(length: number): string {
-  let result = "";
+  let result = '';
   const grawlix = REPLACEMENT_CHARS.grawlix;
 
   for (let i = 0; i < length; i++) {

@@ -1,23 +1,18 @@
-import {
-  FilterOptions,
-  AnalysisResult,
-  ProfanityCategory,
-  Region,
-} from "../types";
+import { FilterOptions, AnalysisResult, ProfanityCategory, Region } from '../types';
 import {
   findProfanity,
   findProfanityWithMetadata,
   findCategories,
   findRegions,
   calculateSeverity,
-} from "./matcher";
-import { splitIntoSentences } from "../utils/stringUtils";
+} from './matcher';
+import { splitIntoSentences } from '../utils/stringUtils';
 import {
   findPossibleProfanityBySimiliarity,
   findProfanityByLevenshteinDistance,
-} from "../utils/similarityUtils";
-import { createContextRegex } from "../utils/regexUtils";
-import { DEFAULT_OPTIONS } from "../config/options";
+} from '../utils/similarityUtils';
+import { createContextRegex } from '../utils/regexUtils';
+import { DEFAULT_OPTIONS } from '../config/options';
 
 /**
  * Menganalisis teks untuk kata kotor
@@ -26,10 +21,7 @@ import { DEFAULT_OPTIONS } from "../config/options";
  * @param options Opsi untuk analisis
  * @return AnalysisResult dengan hasil analisis
  */
-export function analyze(
-  text: string,
-  options: FilterOptions = {},
-): AnalysisResult {
+export function analyze(text: string, options: FilterOptions = {}): AnalysisResult {
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
   const matches = findProfanity(text, mergedOptions);
@@ -65,7 +57,7 @@ export function analyze(
           text,
           wordList,
           mergedOptions.similarityThreshold || 0.8,
-          mergedOptions.maxLevenshteinDistance || 2,
+          mergedOptions.maxLevenshteinDistance || 2
         );
 
         similarWords = levenshteinResults.map((item) => ({
@@ -77,7 +69,7 @@ export function analyze(
         similarWords = findPossibleProfanityBySimiliarity(
           text,
           wordList,
-          mergedOptions.similarityThreshold || 0.8,
+          mergedOptions.similarityThreshold || 0.8
         );
       }
     }
@@ -103,7 +95,7 @@ export function analyze(
  */
 export function batchAnalyze(
   texts: string[],
-  options: FilterOptions = {},
+  options: FilterOptions = {}
 ): {
   totalTexts: number;
   profaneTexts: number;
@@ -116,10 +108,7 @@ export function batchAnalyze(
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
   const results = texts.map((text) => analyze(text, mergedOptions));
   const profaneTexts = results.filter((result) => result.hasProfanity).length;
-  const totalSeverity = results.reduce(
-    (sum, result) => sum + result.severityScore,
-    0,
-  );
+  const totalSeverity = results.reduce((sum, result) => sum + result.severityScore, 0);
   const averageSeverity = profaneTexts > 0 ? totalSeverity / profaneTexts : 0;
   const allCategories = results.flatMap((result) => result.categories);
   const categoryCount: Record<string, number> = {};
@@ -175,7 +164,7 @@ export function batchAnalyze(
  */
 export function analyzeBySentence(
   text: string,
-  options: FilterOptions = {},
+  options: FilterOptions = {}
 ): Array<AnalysisResult & { sentence: string }> {
   const sentences = splitIntoSentences(text);
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
@@ -201,7 +190,7 @@ export function analyzeBySentence(
 export function analyzeWithContext(
   text: string,
   contextWindowSize: number = 5,
-  options: FilterOptions = {},
+  options: FilterOptions = {}
 ): Array<{
   word: string;
   context: string;
@@ -221,9 +210,9 @@ export function analyzeWithContext(
 
     let match;
     while ((match = regex.exec(text)) !== null) {
-      const beforeContext = match[1] || "";
+      const beforeContext = match[1] || '';
       const wordMatch = match[2];
-      const afterContext = match[3] || "";
+      const afterContext = match[3] || '';
 
       result.push({
         word: wordMatch,

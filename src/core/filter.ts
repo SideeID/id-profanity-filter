@@ -1,8 +1,8 @@
-import { FilterOptions, FilterResult, ProfanityWord } from "../types";
-import { findProfanity, findProfanityWithMetadata } from "./matcher";
-import { censorWord, escapeRegExp } from "../utils/stringUtils";
-import { createWordRegex } from "../utils/regexUtils";
-import { DEFAULT_OPTIONS, makeRandomGrawlixString } from "../config/options";
+import { FilterOptions, FilterResult, ProfanityWord } from '../types';
+import { findProfanity, findProfanityWithMetadata } from './matcher';
+import { censorWord, escapeRegExp } from '../utils/stringUtils';
+import { createWordRegex } from '../utils/regexUtils';
+import { DEFAULT_OPTIONS, makeRandomGrawlixString } from '../config/options';
 
 interface FindProfanityFunction {
   (text: string, options?: FilterOptions): string[];
@@ -16,12 +16,9 @@ interface FindProfanityFunction {
  * @param options Opsi untuk filter
  * @returns FilterResult dengan hasil filter
  */
-export function filter(
-  text: string,
-  options: FilterOptions = {},
-): FilterResult {
+export function filter(text: string, options: FilterOptions = {}): FilterResult {
   const {
-    replaceWith = "*",
+    replaceWith = '*',
     fullWordCensor = true,
     detectLeetSpeak = true,
     whitelist = [],
@@ -74,10 +71,7 @@ export function filter(
     const metadata = matchDetails.find(
       (m) =>
         m.word.toLowerCase() === word.toLowerCase() ||
-        (m.aliases &&
-          m.aliases.some(
-            (alias) => alias.toLowerCase() === word.toLowerCase(),
-          )),
+        (m.aliases && m.aliases.some((alias) => alias.toLowerCase() === word.toLowerCase()))
     );
 
     const variants = actualMatches.get(word.toLowerCase()) || [];
@@ -86,7 +80,7 @@ export function filter(
     const uniqueVariants = [...new Set(variants)];
 
     uniqueVariants.forEach((variant) => {
-      const regex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, "gi");
+      const regex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, 'gi');
 
       let match;
       while ((match = regex.exec(filteredText)) !== null) {
@@ -98,11 +92,7 @@ export function filter(
         if (useRandomGrawlix) {
           censoredWord = makeRandomGrawlixString(originalWord.length);
         } else {
-          censoredWord = censorWord(
-            originalWord,
-            replaceWith,
-            !fullWordCensor && keepFirstAndLast,
-          );
+          censoredWord = censorWord(originalWord, replaceWith, !fullWordCensor && keepFirstAndLast);
         }
 
         replacements.push({
@@ -112,8 +102,8 @@ export function filter(
         });
 
         filteredText = filteredText.replace(
-          new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, "g"),
-          censoredWord,
+          new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, 'g'),
+          censoredWord
         );
       }
     });
@@ -141,7 +131,7 @@ export function filter(
             censoredWord = censorWord(
               originalWord,
               replaceWith,
-              !fullWordCensor && keepFirstAndLast,
+              !fullWordCensor && keepFirstAndLast
             );
           }
 
@@ -152,8 +142,8 @@ export function filter(
           });
 
           filteredText = filteredText.replace(
-            new RegExp(escapeRegExp(originalWord), "g"),
-            censoredWord,
+            new RegExp(escapeRegExp(originalWord), 'g'),
+            censoredWord
           );
         }
       }
@@ -180,7 +170,7 @@ export function filter(
             censoredWord = censorWord(
               originalWord,
               replaceWith,
-              !fullWordCensor && keepFirstAndLast,
+              !fullWordCensor && keepFirstAndLast
             );
           }
 
@@ -191,8 +181,8 @@ export function filter(
           });
 
           filteredText = filteredText.replace(
-            new RegExp(escapeRegExp(originalWord), "g"),
-            censoredWord,
+            new RegExp(escapeRegExp(originalWord), 'g'),
+            censoredWord
           );
         }
       }
@@ -204,19 +194,13 @@ export function filter(
       const metadata = matchDetails.find(
         (m) =>
           m.word.toLowerCase() === word.toLowerCase() ||
-          (m.aliases &&
-            m.aliases.some(
-              (alias) => alias.toLowerCase() === word.toLowerCase(),
-            )),
+          (m.aliases && m.aliases.some((alias) => alias.toLowerCase() === word.toLowerCase()))
       );
 
       const variants = actualMatches.get(word.toLowerCase()) || [];
 
       variants.forEach((variant) => {
-        const exactVariantRegex = new RegExp(
-          `\\b${escapeRegExp(variant)}\\b`,
-          "gi",
-        );
+        const exactVariantRegex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, 'gi');
 
         let match;
         while ((match = exactVariantRegex.exec(filteredText)) !== null) {
@@ -231,7 +215,7 @@ export function filter(
             censoredWord = censorWord(
               originalWord,
               replaceWith,
-              !fullWordCensor && keepFirstAndLast,
+              !fullWordCensor && keepFirstAndLast
             );
           }
 
@@ -242,8 +226,8 @@ export function filter(
           });
 
           filteredText = filteredText.replace(
-            new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, "g"),
-            censoredWord,
+            new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, 'g'),
+            censoredWord
           );
         }
       });

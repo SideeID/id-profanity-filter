@@ -8,8 +8,7 @@ export const madura: ProfanityWord[] = [
     severity: 0.7,
     aliases: ['Pate', 'Pate jih', 'pate ben'],
     description: 'Secara harfiah berarti "anjing"',
-    context:
-      'Digunakan untuk menyebut orang yang dianggap hina atau tidak berguna',
+    context: 'Digunakan untuk menyebut orang yang dianggap hina atau tidak berguna',
   },
   {
     word: 'Matanah',
@@ -49,8 +48,7 @@ export const madura: ProfanityWord[] = [
     severity: 0.5,
     aliases: ['Gendheng', 'Bhungghen'],
     description: 'Berarti "bodoh" atau "goblok" dalam bahasa Indonesia',
-    context:
-      'Digunakan untuk menghina kecerdasan seseorang yang dianggap tidak pintar',
+    context: 'Digunakan untuk menghina kecerdasan seseorang yang dianggap tidak pintar',
   },
 ];
 

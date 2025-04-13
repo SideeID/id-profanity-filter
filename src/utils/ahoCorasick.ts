@@ -30,7 +30,7 @@ export class AhoCorasick {
    */
   addPattern(pattern: string): void {
     if (this.built) {
-      throw new Error("Cannot add patterns after the automaton is built");
+      throw new Error('Cannot add patterns after the automaton is built');
     }
 
     let node = this.root;

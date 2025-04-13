@@ -8,8 +8,8 @@
  */
 export function censorWord(
   word: string,
-  replaceChar: string = "*",
-  keepFirstAndLast: boolean = false,
+  replaceChar: string = '*',
+  keepFirstAndLast: boolean = false
 ): string {
   if (word.length <= 2) {
     return replaceChar.repeat(word.length);
@@ -31,9 +31,9 @@ export function censorWord(
 export function normalizeText(text: string): string {
   return text
     .toLowerCase()
-    .normalize("NFD") // Normalisasi Unicode
-    .replace(/[\u0300-\u036f]/g, "") // Hapus diacritic marks
-    .replace(/[^\w\s]/g, "") // Hapus karakter non-alphanumeric
+    .normalize('NFD') // Normalisasi Unicode
+    .replace(/[\u0300-\u036f]/g, '') // Hapus diacritic marks
+    .replace(/[^\w\s]/g, '') // Hapus karakter non-alphanumeric
     .trim(); // Hapus whitespace di awal dan akhir
 }
 
@@ -48,7 +48,7 @@ export function normalizeText(text: string): string {
 export function containsAnyWord(
   text: string,
   wordList: string[],
-  checkSubstring: boolean = false,
+  checkSubstring: boolean = false
 ): boolean {
   const normalizedText = normalizeText(text);
 
@@ -56,9 +56,7 @@ export function containsAnyWord(
     const normalizedWord = normalizeText(word);
     return checkSubstring
       ? normalizedText.includes(normalizedWord)
-      : new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, "i").test(
-          normalizedText,
-        );
+      : new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, 'i').test(normalizedText);
   });
 }
 
@@ -78,7 +76,7 @@ export function containsEuphemism(text: string, wordList: string[]): boolean {
     const lastChar = word[word.length - 1];
     const pattern = new RegExp(
       `\\b${escapeRegExp(firstChar)}[*@#\\-_.!?\\s]{${word.length - 2}}${escapeRegExp(lastChar)}\\b`,
-      "i",
+      'i'
     );
 
     return pattern.test(text);
@@ -94,13 +92,13 @@ export function containsEuphemism(text: string, wordList: string[]): boolean {
  * @returns Boolean apakah teks mengandung upaya menghindari filter
  */
 export function detectSplitWords(text: string, wordList: string[]): boolean {
-  const compressedText = text.replace(/[\s\-_.!?*]/g, "").toLowerCase();
+  const compressedText = text.replace(/[\s\-_.!?*]/g, '').toLowerCase();
 
   return wordList.some((word) => compressedText.includes(normalizeText(word)));
 }
 
 export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -117,9 +115,9 @@ export function maskText(
   text: string,
   visibleStart: number = 1,
   visibleEnd: number = 1,
-  maskChar: string = "*",
+  maskChar: string = '*'
 ): string {
-  if (!text) return "";
+  if (!text) return '';
   if (text.length <= visibleStart + visibleEnd) return text;
 
   const start = text.substring(0, visibleStart);
@@ -138,26 +136,26 @@ export function maskText(
  */
 export function toLeetSpeak(text: string): string {
   const leetMap: Record<string, string[]> = {
-    a: ["4", "@"],
-    b: ["8", "6"],
-    c: ["<", "(", "{"],
-    e: ["3"],
-    g: ["9"],
-    i: ["1", "!"],
-    l: ["1", "|"],
-    o: ["0"],
-    s: ["5", "$"],
-    t: ["7", "+"],
-    z: ["2"],
+    a: ['4', '@'],
+    b: ['8', '6'],
+    c: ['<', '(', '{'],
+    e: ['3'],
+    g: ['9'],
+    i: ['1', '!'],
+    l: ['1', '|'],
+    o: ['0'],
+    s: ['5', '$'],
+    t: ['7', '+'],
+    z: ['2'],
   };
 
   return text
-    .split("")
+    .split('')
     .map((char) => {
       const lowerChar = char.toLowerCase();
       return leetMap[lowerChar] || char;
     })
-    .join("");
+    .join('');
 }
 
 /**
@@ -168,9 +166,7 @@ export function toLeetSpeak(text: string): string {
  */
 export function splitIntoSentences(text: string): string[] {
   // split berdasarkan titik, seru, taya yagn diikuti spasi atau akhir string
-  return text
-    .split(/(?<=[.!?])\s+|(?<=[.!?])$/)
-    .filter((sentence) => sentence.trim().length > 0);
+  return text.split(/(?<=[.!?])\s+|(?<=[.!?])$/).filter((sentence) => sentence.trim().length > 0);
 }
 
 /**
@@ -181,12 +177,8 @@ export function splitIntoSentences(text: string): string[] {
  * @param windowSize jumlah kata di sekitar indeks
  * @return Kata-kata di sekitar indeks
  */
-export function getContextAroundIndex(
-  text: string,
-  index: number,
-  windowSize: number = 5,
-): string {
-  if (!text || index < 0 || index >= text.length) return "";
+export function getContextAroundIndex(text: string, index: number, windowSize: number = 5): string {
+  if (!text || index < 0 || index >= text.length) return '';
 
   const words = text.split(/\s+/);
 
@@ -203,11 +195,11 @@ export function getContextAroundIndex(
     currentPosition += wordLength + 1;
   }
 
-  if (targetWordIndex === -1) return "";
+  if (targetWordIndex === -1) return '';
 
   // Ambil kata-kata di sekitar
   const startIndex = Math.max(0, targetWordIndex - windowSize);
   const endIndex = Math.min(words.length, targetWordIndex + windowSize + 1);
 
-  return words.slice(startIndex, endIndex).join(" ");
+  return words.slice(startIndex, endIndex).join(' ');
 }

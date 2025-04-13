@@ -8,12 +8,7 @@ export * from './utils/similarityUtils';
 export * from './config/options';
 
 import { filter, isProfane } from './core/filter';
-import {
-  analyze,
-  batchAnalyze,
-  analyzeBySentence,
-  analyzeWithContext,
-} from './core/analyzer';
+import { analyze, batchAnalyze, analyzeBySentence, analyzeWithContext } from './core/analyzer';
 import { FilterOptions, FilterResult, AnalysisResult } from './types';
 import {
   DEFAULT_OPTIONS,
@@ -105,10 +100,7 @@ export class IDProfanityFilter {
    * @param presetName Nama preset yang akan digunakan
    * @param additionalOptions Opsi tambahan untuk override
    */
-  usePreset(
-    presetName: string,
-    additionalOptions: Partial<FilterOptions> = {},
-  ) {
+  usePreset(presetName: string, additionalOptions: Partial<FilterOptions> = {}) {
     this.options = getPresetOptions(presetName, additionalOptions);
   }
 
@@ -125,10 +117,7 @@ export class IDProfanityFilter {
    * @param word Kata yang akan diabaikan
    */
   addToWhitelist(word: string) {
-    this.options.whitelist = [
-      ...(this.options.whitelist || []),
-      word.toLowerCase(),
-    ];
+    this.options.whitelist = [...(this.options.whitelist || []), word.toLowerCase()];
   }
 
   /**
@@ -139,7 +128,7 @@ export class IDProfanityFilter {
     if (!this.options.whitelist) return;
 
     this.options.whitelist = this.options.whitelist.filter(
-      (w) => w.toLowerCase() !== word.toLowerCase(),
+      (w) => w.toLowerCase() !== word.toLowerCase()
     );
   }
 
@@ -166,7 +155,7 @@ export class IDProfanityFilter {
   enableSimilarityDetection(
     threshold: number = 0.8,
     useLevenshtein: boolean = false,
-    maxLevenshteinDistance: number = 2,
+    maxLevenshteinDistance: number = 2
   ) {
     this.options.detectSimilarity = true;
     this.options.similarityThreshold = threshold;

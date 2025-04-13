@@ -1,22 +1,22 @@
-import { ProfanityWord } from "../types";
-import { sexualWords } from "./categories/sexual";
-import { insultWords } from "./categories/insult";
-// import { profanityWords } from './categories/profanity';
-// import { slurWords } from './categories/slur';
-// import { drugsWords } from './categories/drugs';
-// import { disgustingWords } from './categories/disgusting';
-// import { blasphemyWords } from './categories/blasphemy';
+import { ProfanityWord } from '../types';
+import { sexualWords } from './categories/sexual';
+import { insultWords } from './categories/insult';
+import { profanityWords } from './categories/profanity';
+import { slurWords } from './categories/slur';
+import { drugsWords } from './categories/drugs';
+import { disgustingWords } from './categories/disgusting';
+import { blasphemyWords } from './categories/blasphemy';
 
-import { general, generalWords } from "./regions/general";
-import { jawa, jawaWords } from "./regions/jawa";
-import { sunda, sundaWords } from "./regions/sunda";
-import { betawi, betawiWords } from "./regions/betawi";
-import { batak, batakWords } from "./regions/batak";
-// import { minang, minangWords } from './regions/minang';
-// import { bali, baliWords } from './regions/bali';
-// import { madura, maduraWords } from './regions/madura';
+import { general, generalWords } from './regions/general';
+import { jawa, jawaWords } from './regions/jawa';
+import { sunda, sundaWords } from './regions/sunda';
+import { betawi, betawiWords } from './regions/betawi';
+import { batak, batakWords } from './regions/batak';
+import { minang, minangWords } from './regions/minang';
+import { bali, baliWords } from './regions/bali';
+import { madura, maduraWords } from './regions/madura';
 // import { bugis, bugisWords } from './regions/bugis';
-// import { aceh, acehWords } from './regions/aceh';
+import { aceh, acehWords } from './regions/aceh';
 // import { ambon, ambonWords } from './regions/ambon';
 // import { papua, papuaWords } from './regions/papua';
 // import { manado, manadoWords } from './regions/manado';
@@ -29,11 +29,11 @@ import { batak, batakWords } from "./regions/batak";
 export const wordCategories = {
   sexual: sexualWords,
   insult: insultWords,
-  // profanity: profanityWords,
-  // slur: slurWords,
-  // drugs: drugsWords,
-  // disgusting: disgustingWords,
-  // blasphemy: blasphemyWords,
+  profanity: profanityWords,
+  slur: slurWords,
+  drugs: drugsWords,
+  disgusting: disgustingWords,
+  blasphemy: blasphemyWords,
 };
 
 export const wordRegions = {
@@ -42,11 +42,11 @@ export const wordRegions = {
   sunda: sundaWords,
   betawi: betawiWords,
   batak: batakWords,
-  // minang: minangWords,
-  // bali: baliWords,
-  // madura: maduraWords,
+  minang: minangWords,
+  bali: baliWords,
+  madura: maduraWords,
   // bugis: bugisWords,
-  // aceh: acehWords,
+  aceh: acehWords,
   // ambon: ambonWords,
   // papua: papuaWords,
   // manado: manadoWords,
@@ -63,11 +63,11 @@ export const wordObjects: ProfanityWord[] = [
   ...sunda,
   ...betawi,
   ...batak,
-  // ...minang,
-  // ...bali,
-  // ...madura,
+  ...minang,
+  ...bali,
+  ...madura,
   // ...bugis,
-  // ...aceh,
+  ...aceh,
   // ...ambon,
   // ...papua,
   // ...manado,
@@ -122,10 +122,7 @@ export function getWordMetadata(word: string): ProfanityWord | undefined {
   return wordObjects.find(
     (item) =>
       item.word.toLowerCase() === word.toLowerCase() ||
-      (item.aliases &&
-        item.aliases.some(
-          (alias) => alias.toLowerCase() === word.toLowerCase(),
-        )),
+      (item.aliases && item.aliases.some((alias) => alias.toLowerCase() === word.toLowerCase()))
   );
 }
 
