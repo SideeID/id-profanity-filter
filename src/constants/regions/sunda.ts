@@ -38,15 +38,6 @@ export const sunda: ProfanityWord[] = [
     context: 'Digunakan saat berbicara dengan teman dekat, tapi termasuk kasar',
   },
   {
-    word: 'sia',
-    category: 'insult',
-    region: 'sunda',
-    severity: 0.3,
-    aliases: ['silaing'],
-    description: 'Kata ganti orang kedua yang kasar',
-    context: "Digunakan sebagai pengganti 'kamu' dalam bentuk kasar",
-  },
-  {
     word: 'anjing',
     category: 'profanity',
     region: 'sunda',
