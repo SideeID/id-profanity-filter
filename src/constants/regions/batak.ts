@@ -182,15 +182,6 @@ export const batak: ProfanityWord[] = [
     context: 'Umpatan kasar untuk menyebut seseorang yang sangat tidak pintar.',
   },
   {
-    word: 'te',
-    category: 'disgusting',
-    region: 'batak',
-    severity: 0.6,
-    aliases: [],
-    description: 'Secara harfiah berarti kotoran atau najis',
-    context: 'Umpatan untuk menunjukkan sesuatu yang menjijikkan atau kotor.',
-  },
-  {
     word: 'rojan',
     category: 'disgusting',
     region: 'batak',
