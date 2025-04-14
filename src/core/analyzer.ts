@@ -24,6 +24,10 @@ import { DEFAULT_OPTIONS } from '../config/options';
 export function analyze(text: string, options: FilterOptions = {}): AnalysisResult {
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
+  if (mergedOptions.whitelist) {
+    mergedOptions.whitelist = mergedOptions.whitelist.map((w) => w.toLowerCase());
+  }
+
   const matches = findProfanity(text, mergedOptions);
 
   if (matches.length === 0) {

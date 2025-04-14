@@ -46,6 +46,8 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
     maxLevenshteinDistance = 2,
   } = { ...DEFAULT_OPTIONS, ...options };
 
+  const normalizedWhitelist = whitelist.map((w) => w.toLowerCase());
+
   const normalizedText = normalizeText(text);
 
   let baseWordsToCheck: string[] = wordList.length > 0 ? wordList : [];
@@ -91,7 +93,11 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 
   const basicMatches = globalAhoCorasick.searchUnique(normalizedText);
   for (const match of basicMatches) {
+    if (normalizedWhitelist.includes(match.toLowerCase())) continue;
+
     const originalWord = aliasMap.get(match.toLowerCase()) || match.toLowerCase();
+    if (normalizedWhitelist.includes(originalWord)) continue;
+
     matches.add(originalWord);
 
     if (!actualMatches.has(originalWord)) {
@@ -112,7 +118,12 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 
       let match;
       while ((match = leetRegex.exec(text)) !== null) {
+        const matchedText = match[0];
+        if (normalizedWhitelist.includes(matchedText.toLowerCase())) continue;
+
         const originalWord = aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        if (normalizedWhitelist.includes(originalWord)) continue;
+
         matches.add(originalWord);
 
         if (!actualMatches.has(originalWord)) {
@@ -135,7 +146,12 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 
       let match;
       while ((match = variantRegex.exec(text)) !== null) {
+        const matchedText = match[0];
+        if (normalizedWhitelist.includes(matchedText.toLowerCase())) continue;
+
         const originalWord = aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        if (normalizedWhitelist.includes(originalWord)) continue;
+
         matches.add(originalWord);
 
         if (!actualMatches.has(originalWord)) {
@@ -158,7 +174,12 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 
       let match;
       while ((match = splitRegex.exec(text)) !== null) {
+        const matchedText = match[0];
+        if (normalizedWhitelist.includes(matchedText.toLowerCase())) continue;
+
         const originalWord = aliasMap.get(word.toLowerCase()) || word.toLowerCase();
+        if (normalizedWhitelist.includes(originalWord)) continue;
+
         matches.add(originalWord);
 
         if (!actualMatches.has(originalWord)) {
@@ -179,8 +200,13 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
       );
 
       possibleProfanity.forEach((item) => {
+        // Check if the matched word is in whitelist
+        if (normalizedWhitelist.includes(item.word.toLowerCase())) return;
+
         const originalWord =
           aliasMap.get(item.original.toLowerCase()) || item.original.toLowerCase();
+        if (normalizedWhitelist.includes(originalWord)) return;
+
         matches.add(originalWord);
 
         if (!actualMatches.has(originalWord)) {
@@ -196,10 +222,15 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
       );
 
       possibleProfanity.forEach((item) => {
-        matches.add(item.original.toLowerCase());
+        // Check if the matched word is in whitelist
+        if (normalizedWhitelist.includes(item.word.toLowerCase())) return;
 
         const originalWord =
           aliasMap.get(item.original.toLowerCase()) || item.original.toLowerCase();
+        if (normalizedWhitelist.includes(originalWord)) return;
+
+        matches.add(originalWord);
+
         if (!actualMatches.has(originalWord)) {
           actualMatches.set(originalWord, []);
         }
