@@ -58,14 +58,14 @@ export function addLeetSpeakVariations(pattern: string): string {
   const leetMap: Record<string, string[]> = {
     a: ['a', '4', '@'],
     b: ['b', '8', '6'],
-    c: ['c', '(', '{', '<'],
+    c: ['c', '\\(', '\\{', '<'],
     e: ['e', '3'],
     g: ['g', '6', '9'],
-    i: ['i', '1', '!', '|'],
-    l: ['l', '1', '|'],
+    i: ['i', '1', '!', '\\|'],
+    l: ['l', '1', '\\|'],
     o: ['o', '0'],
-    s: ['s', '5', '$'],
-    t: ['t', '7', '+'],
+    s: ['s', '5', '\\$'],
+    t: ['t', '7', '\\+'],
     z: ['z', '2'],
   };
 
@@ -91,8 +91,23 @@ export function addLeetSpeakVariations(pattern: string): string {
  * @returns Pola regex dengan kemungkinan split
  */
 export function addSplitVariations(pattern: string): string {
-  // Tambahkan kemungkinan spasi atau karakter penghubung di antara setiap huruf
-  return pattern.split('').join('[\\s\\-._*+]?');
+  // Instead of joining character by character with a separator pattern,
+  // we'll create a simpler version that matches the pattern with optional separators
+
+  // Convert each character to a pattern that allows optional separators before it
+  // except for the first character
+  let result = '';
+  const chars = pattern.split('');
+
+  for (let i = 0; i < chars.length; i++) {
+    if (i > 0) {
+      // Add optional separator before each character except the first
+      result += '[\\s\\-._*+]?';
+    }
+    result += chars[i];
+  }
+
+  return result;
 }
 
 /**
@@ -103,10 +118,24 @@ export function addSplitVariations(pattern: string): string {
  * @returns Objek RegExp
  */
 export function createEvasionRegex(word: string): RegExp {
-  // Tambahkan kemungkinan spasi atau karakter penghubung di antara setiap huruf
-  const pattern = addSplitVariations(escapeRegExp(word));
+  // Escape karakter khusus regex
+  const escaped = escapeRegExp(word);
 
-  return new RegExp(pattern, 'gi');
+  // Create a regex pattern that allows any separator between characters
+  let result = '';
+  const chars = escaped.split('');
+
+  for (let i = 0; i < chars.length; i++) {
+    // Add the character
+    result += chars[i];
+
+    // Add optional separator after each character except the last
+    if (i < chars.length - 1) {
+      result += '[\\s\\-._*+]?';
+    }
+  }
+
+  return new RegExp(result, 'gi');
 }
 
 /**
@@ -120,7 +149,7 @@ export function addIndonesianVariations(pattern: string): string {
   const variationMap: Record<string, string[]> = {
     c: ['c', 'k'], // contoh: becok/bekok
     k: ['k', 'c', 'q'], // contoh: kacau/qacau
-    j: ['j', 'dj'], // contoh: jualan/djualan (ejaan lama)
+    j: ['j', 'd'], // contoh: jualan/dualan (ejaan lama)
     y: ['y', 'j'], // contoh: ya/ja
     u: ['u', 'oe'], // contoh: untuk/oentoek (ejaan lama)
     f: ['f', 'p', 'v'], // contoh: kafir/kapir
@@ -128,20 +157,21 @@ export function addIndonesianVariations(pattern: string): string {
     x: ['x', 'ks'], // contoh: taxi/taksi
   };
 
-  // Ganti tiap karakter dengan variasinya
-  return pattern
-    .split('')
-    .map((char) => {
-      const lowerChar = char.toLowerCase();
-      const variations = variationMap[lowerChar];
+  // Go through each character in the pattern and replace with variations
+  let result = '';
+  for (const char of pattern) {
+    const lowerChar = char.toLowerCase();
+    const variations = variationMap[lowerChar];
 
-      if (variations && variations.length > 1) {
-        return `[${variations.join('')}]`;
-      }
+    if (variations && variations.length > 1) {
+      // Create a character class with all variations
+      result += `[${variations.join('')}]`;
+    } else {
+      result += char;
+    }
+  }
 
-      return char;
-    })
-    .join('');
+  return result;
 }
 
 /**
@@ -151,7 +181,8 @@ export function addIndonesianVariations(pattern: string): string {
  * @returns Objek RegExp
  */
 export function createIndonesianVariationRegex(word: string): RegExp {
-  const pattern = addIndonesianVariations(escapeRegExp(word));
+  const escapedWord = escapeRegExp(word);
+  const pattern = addIndonesianVariations(escapedWord);
   return new RegExp(`\\b${pattern}\\b`, 'gi');
 }
 
@@ -179,17 +210,36 @@ export function createContextRegex(word: string, contextSize: number = 3): RegEx
  */
 export function createWordFormRegex(word: string): RegExp {
   // Implementasi sederhana untuk mencocokkan berbagai imbuhan
-  // Ini bisa dikembangkan lebih lanjut untuk mencocokkan bentukan kata yang lebih kompleks
-  const prefixes = ['', 'me', 'pe', 'ber', 'di', 'ter', 'se'];
-  const suffixes = ['', 'kan', 'an', 'i', 'nya'];
+  const escapedWord = escapeRegExp(word);
+
+  // Common Indonesian prefixes and suffixes
+  const prefixes = [
+    '',
+    'me',
+    'pe',
+    'ber',
+    'di',
+    'ter',
+    'se',
+    'ke',
+    'mem',
+    'pem',
+    'bel',
+    'peng',
+    'meng',
+  ];
+  const suffixes = ['', 'kan', 'an', 'i', 'nya', 'lah', 'kah'];
 
   const patterns = [];
 
-  // Kombinasikan prefix dan suffix
   for (const prefix of prefixes) {
     for (const suffix of suffixes) {
-      patterns.push(`\\b${prefix}${escapeRegExp(word)}${suffix}\\b`);
+      patterns.push(`\\b${prefix}${escapedWord}${suffix}\\b`);
     }
+  }
+
+  if (/^[aiueo]/.test(word)) {
+    patterns.push(`\\bng${escapedWord}\\b`);
   }
 
   return new RegExp(patterns.join('|'), 'gi');
