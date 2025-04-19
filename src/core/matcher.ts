@@ -29,6 +29,14 @@ interface FindProfanityFunction {
   lastActualMatches?: Map<string, string[]>;
 }
 
+function getWordMetadata(word: string): ProfanityWord | undefined {
+  return wordObjects.find(
+    (obj) =>
+      obj.word.toLowerCase() === word.toLowerCase() ||
+      (obj.aliases && obj.aliases.some((alias) => alias.toLowerCase() === word.toLowerCase()))
+  );
+}
+
 export function findProfanity(text: string, options: FilterOptions = {}): string[] {
   const {
     wordList = [],
@@ -65,21 +73,25 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 
   const aliasMap = new Map<string, string>();
   wordObjects.forEach((wordObj) => {
-    if (wordObj.aliases && wordObj.aliases.length > 0) {
-      const matchCategory = categories ? categories.includes(wordObj.category) : true;
-      const matchRegion = regions ? regions.includes(wordObj.region) : true;
-      const matchSeverity = wordObj.severity >= severityThreshold;
+    const matchCategory = categories ? categories.includes(wordObj.category) : true;
+    const matchRegion = regions ? regions.includes(wordObj.region) : true;
+    const matchSeverity = wordObj.severity >= severityThreshold;
 
-      if (matchCategory && matchRegion && matchSeverity) {
-        wordObj.aliases.forEach((alias) => {
-          aliasMap.set(alias.toLowerCase(), wordObj.word.toLowerCase());
-        });
-      }
+    if (
+      matchCategory &&
+      matchRegion &&
+      matchSeverity &&
+      wordObj.aliases &&
+      wordObj.aliases.length > 0
+    ) {
+      wordObj.aliases.forEach((alias) => {
+        aliasMap.set(alias.toLowerCase(), wordObj.word.toLowerCase());
+      });
     }
   });
 
   const wordsToCheck = [...baseWordsToCheck, ...Array.from(aliasMap.keys())].filter(
-    (word) => !whitelist.includes(word.toLowerCase())
+    (word) => !normalizedWhitelist.includes(word.toLowerCase())
   );
 
   if (wordsToCheck.length === 0) {
@@ -89,6 +101,19 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
   const matches = new Set<string>();
   const actualMatches = new Map<string, string[]>();
 
+  const passesFilters = (word: string): boolean => {
+    if (normalizedWhitelist.includes(word.toLowerCase())) return false;
+
+    const metadata = getWordMetadata(word);
+    if (!metadata) return false;
+
+    const matchCategory = categories ? categories.includes(metadata.category) : true;
+    const matchRegion = regions ? regions.includes(metadata.region) : true;
+    const matchSeverity = metadata.severity >= severityThreshold;
+
+    return matchCategory && matchRegion && matchSeverity;
+  };
+
   initializeAhoCorasick(wordsToCheck);
 
   const basicMatches = globalAhoCorasick.searchUnique(normalizedText);
@@ -96,7 +121,8 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
     if (normalizedWhitelist.includes(match.toLowerCase())) continue;
 
     const originalWord = aliasMap.get(match.toLowerCase()) || match.toLowerCase();
-    if (normalizedWhitelist.includes(originalWord)) continue;
+
+    if (!passesFilters(originalWord)) continue;
 
     matches.add(originalWord);
 
@@ -122,7 +148,8 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
         if (normalizedWhitelist.includes(matchedText.toLowerCase())) continue;
 
         const originalWord = aliasMap.get(word.toLowerCase()) || word.toLowerCase();
-        if (normalizedWhitelist.includes(originalWord)) continue;
+
+        if (!passesFilters(originalWord)) continue;
 
         matches.add(originalWord);
 
@@ -150,7 +177,8 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
         if (normalizedWhitelist.includes(matchedText.toLowerCase())) continue;
 
         const originalWord = aliasMap.get(word.toLowerCase()) || word.toLowerCase();
-        if (normalizedWhitelist.includes(originalWord)) continue;
+
+        if (!passesFilters(originalWord)) continue;
 
         matches.add(originalWord);
 
@@ -178,7 +206,8 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
         if (normalizedWhitelist.includes(matchedText.toLowerCase())) continue;
 
         const originalWord = aliasMap.get(word.toLowerCase()) || word.toLowerCase();
-        if (normalizedWhitelist.includes(originalWord)) continue;
+
+        if (!passesFilters(originalWord)) continue;
 
         matches.add(originalWord);
 
@@ -200,12 +229,11 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
       );
 
       possibleProfanity.forEach((item) => {
-        // Check if the matched word is in whitelist
         if (normalizedWhitelist.includes(item.word.toLowerCase())) return;
 
         const originalWord =
           aliasMap.get(item.original.toLowerCase()) || item.original.toLowerCase();
-        if (normalizedWhitelist.includes(originalWord)) return;
+        if (!passesFilters(originalWord)) return;
 
         matches.add(originalWord);
 
@@ -222,12 +250,11 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
       );
 
       possibleProfanity.forEach((item) => {
-        // Check if the matched word is in whitelist
         if (normalizedWhitelist.includes(item.word.toLowerCase())) return;
 
         const originalWord =
           aliasMap.get(item.original.toLowerCase()) || item.original.toLowerCase();
-        if (normalizedWhitelist.includes(originalWord)) return;
+        if (!passesFilters(originalWord)) return;
 
         matches.add(originalWord);
 
@@ -337,7 +364,5 @@ export function calculateSeverity(matchDetails: ProfanityWord[]): number {
 
   const severityAvg = severitySum / matchDetails.length;
 
-  // Gabungkan jumlah kata dan keparahan rata-rata
-  // 70% keparahan kata + 30% faktor jumlah
   return 0.7 * severityAvg + 0.3 * countFactor;
 }
