@@ -13,22 +13,18 @@ export function levenshteinDistance(str1: string, str2: string): number {
   const len1 = s1.length;
   const len2 = s2.length;
 
-  // Inisialisasi matrix
   const matrix: number[][] = [];
 
-  // Inisialisasi baris pertama
   for (let i = 0; i <= len2; i++) {
     matrix[0] = matrix[0] || [];
     matrix[0][i] = i;
   }
 
-  // Inisialisasi kolom pertama
   for (let i = 0; i <= len1; i++) {
     matrix[i] = matrix[i] || [];
     matrix[i][0] = i;
   }
 
-  // Isi matrix
   for (let i = 1; i <= len1; i++) {
     for (let j = 1; j <= len2; j++) {
       const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
