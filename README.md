@@ -1,10 +1,29 @@
-# ID-Profanity-Filter
+<div align="center">
+  <img alt="SideID - Profanity Filter" src="https://socialify.git.ci/SideeID/id-profanity-filter/image?custom_description=Library+JavaScript%2FTypeScript+untuk+mendeteksi%2C+menyensor%2C+dan+menganalisis+kata-kata+kotor+dalam+Indonesia+dan+daerah.&description=1&font=Inter&forks=1&language=1&name=1&owner=1&pattern=Circuit+Board&stargazers=1&theme=Auto">
+</div>
 
-![License](https://img.shields.io/npm/l/@sideid/id-profanity-filter)
-![Version](https://img.shields.io/npm/v/@sideid/id-profanity-filter)
-![Downloads](https://img.shields.io/npm/dt/@sideid/id-profanity-filter)
+---
 
-Library JavaScript/TypeScript untuk mendeteksi, menyensor, dan menganalisis kata-kata kotor dalam Bahasa Indonesia dan bahasa daerah.
+<div align="center">
+  <a href="https://www.npmjs.com/package/@sideid/id-profanity-filter">
+    <img src="https://img.shields.io/npm/v/@sideid/id-profanity-filter.svg" alt="NPM Version">
+  </a>
+  <a href="https://www.npmjs.com/package/@sideid/id-profanity-filter">
+    <img src="https://img.shields.io/npm/dt/@sideid/id-profanity-filter?label=npm&color=%23CB3837" alt="NPM Downloads">
+  </a>
+  <a href="https://github.com/SideeID/id-profanity-filter">
+    <img src="https://img.shields.io/github/languages/code-size/SideeID/id-profanity-filter" alt="GitHub Code Size">
+  </a>
+  <a href="https://github.com/SideeID/id-profanity-filter">
+    <img src="https://img.shields.io/github/license/SideeID/id-profanity-filter" alt="GitHub License">
+  </a>
+  <a href="https://github.com/SideeID/id-profanity-filter">
+    <img src="https://img.shields.io/github/stars/SideeID/id-profanity-filter" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/SideeID/id-profanity-filter">
+    <img src="https://img.shields.io/github/forks/SideeID/id-profanity-filter" alt="GitHub Forks">
+  </a>
+</div>
 
 ## Fitur Utama
 
