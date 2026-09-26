@@ -66,6 +66,24 @@ describe('Matcher Core', () => {
       expect(resultsWithGeneral).toContain('anjing');
       expect(resultsWithGeneral).not.toContain('jancok');
     });
+
+    test('should not trigger false positives on innocent words with substring matches by default', () => {
+      expect(findProfanity('saya mau masuk ke rumah')).toEqual([]);
+      expect(findProfanity('saya tidur di kasur')).toEqual([]);
+      expect(findProfanity('kunjungi website kami')).toEqual([]);
+      expect(findProfanity('barang ini asli')).toEqual([]);
+      expect(findProfanity('agama islam')).toEqual([]);
+      expect(findProfanity('saya sudah makan')).toEqual([]);
+    });
+
+    test('should detect custom wordList without built-in leakage', () => {
+      const results = findProfanity('film ini jelek dan payah anjing', {
+        wordList: ['jelek', 'payah'],
+      });
+      expect(results).toContain('jelek');
+      expect(results).toContain('payah');
+      expect(results).not.toContain('anjing');
+    });
   });
 
   describe('findProfanityWithMetadata function', () => {

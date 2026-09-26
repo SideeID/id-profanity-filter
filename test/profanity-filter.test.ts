@@ -49,6 +49,21 @@ describe('IDProfanityFilter', () => {
       expect(result.filtered).not.toContain('anjing');
       expect(result.filtered).not.toEqual('Dasar anjing kamu!');
     });
+
+    test('should reset options to default with resetOptions', () => {
+      filter.setOptions({ replaceWith: '#' });
+      expect(filter.filter('anjing').filtered).toBe('######');
+      filter.resetOptions();
+      expect(filter.filter('anjing').filtered).toBe('******');
+    });
+
+    test('should censor custom wordList correctly', () => {
+      filter.resetOptions();
+      filter.setWordList(['jelek', 'payah']);
+      const result = filter.filter('Film itu sangat jelek dan payah!');
+      expect(result.filtered).toBe('Film itu sangat ***** dan *****!');
+      expect(result.censored).toBe(2);
+    });
   });
 
   describe('preset functionality', () => {

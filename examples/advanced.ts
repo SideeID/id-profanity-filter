@@ -29,7 +29,7 @@ console.log('Preset Light:', filter.filter(teks1).filtered);
 // ===== Contoh 2: Deteksi Variasi Penulisan =====
 console.log('\n=== Contoh Deteksi Variasi Penulisan ===\n');
 
-filter.setOptions({
+filter.resetOptions({
   detectLeetSpeak: true,
   indonesianVariation: true,
   detectSplit: true,
@@ -46,6 +46,7 @@ console.log('Kata terdeteksi:', leetAnalisis.matches);
 // ===== Contoh 3: Deteksi Kesamaan Kata =====
 console.log('\n=== Contoh Deteksi Kesamaan Kata ===\n');
 
+filter.resetOptions();
 filter.enableSimilarityDetection(0.8);
 
 const teks3 = 'Dia benar-benar anjiing dan gooblok!';
@@ -58,6 +59,7 @@ console.log('Hasil filter:', filter.filter(teks3).filtered);
 
 // ===== Contoh 4: Analisis dengan Konteks =====
 console.log('\n=== Contoh Analisis dengan Konteks ===\n');
+filter.resetOptions();
 
 const teks4 =
   'Para kritikus film sangat marah dengan kualitas filmnya, mereka menyebut sutradara itu anjing karena mengecewakan penonton dan membuang-buang anggaran.';
@@ -73,6 +75,7 @@ konteksAnalisis.forEach((item) => {
 
 // ===== Contoh 5: Batch Analisis =====
 console.log('\n=== Contoh Batch Analisis ===\n');
+filter.resetOptions();
 
 const tekstBatch = [
   'Film ini sangat bagus, ceritanya menarik sekali!',

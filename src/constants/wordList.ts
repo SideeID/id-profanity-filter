@@ -15,16 +15,7 @@ import { batak, batakWords } from './regions/batak';
 import { minang, minangWords } from './regions/minang';
 import { bali, baliWords } from './regions/bali';
 import { madura, maduraWords } from './regions/madura';
-// import { bugis, bugisWords } from './regions/bugis';
 import { aceh, acehWords } from './regions/aceh';
-// import { ambon, ambonWords } from './regions/ambon';
-// import { papua, papuaWords } from './regions/papua';
-// import { manado, manadoWords } from './regions/manado';
-// import { banjar, banjarWords } from './regions/banjar';
-// import { palembang, palembangWords } from './regions/palembang';
-// import { lampung, lampungWords } from './regions/lampung';
-// import { ntt, nttWords } from './regions/ntt';
-// import { ntb, ntbWords } from './regions/ntb';
 
 export const wordCategories = {
   sexual: sexualWords,
@@ -45,16 +36,7 @@ export const wordRegions = {
   minang: minangWords,
   bali: baliWords,
   madura: maduraWords,
-  // bugis: bugisWords,
   aceh: acehWords,
-  // ambon: ambonWords,
-  // papua: papuaWords,
-  // manado: manadoWords,
-  // banjar: banjarWords,
-  // palembang: palembangWords,
-  // lampung: lampungWords,
-  // ntt: nttWords,
-  // ntb: ntbWords,
 };
 
 export const wordObjects: ProfanityWord[] = [
@@ -66,16 +48,7 @@ export const wordObjects: ProfanityWord[] = [
   ...minang,
   ...bali,
   ...madura,
-  // ...bugis,
   ...aceh,
-  // ...ambon,
-  // ...papua,
-  // ...manado,
-  // ...banjar,
-  // ...palembang,
-  // ...lampung,
-  // ...ntt,
-  // ...ntb,
 ];
 
 export const allWords: string[] = wordObjects.map((item) => item.word);

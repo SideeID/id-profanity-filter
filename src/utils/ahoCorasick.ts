@@ -146,6 +146,43 @@ export class AhoCorasick {
   }
 
   /**
+   * Mencari semua kemunculan pola beserta posisi indeks awal dan akhirnya
+   * @param text Teks yang akan dicari
+   * @returns Array objek berisi pattern, start, dan end
+   */
+  searchWithPositions(text: string): Array<{ pattern: string; start: number; end: number }> {
+    if (!this.built) {
+      this.build();
+    }
+
+    const results: Array<{ pattern: string; start: number; end: number }> = [];
+    const normalizedText = text.toLowerCase();
+    let node = this.root;
+
+    for (let i = 0; i < normalizedText.length; i++) {
+      const char = normalizedText[i];
+
+      while (node !== this.root && !node.children.has(char)) {
+        node = node.fail!;
+      }
+
+      if (node.children.has(char)) {
+        node = node.children.get(char)!;
+      }
+
+      for (const match of node.output) {
+        results.push({
+          pattern: match,
+          start: i + 1 - match.length,
+          end: i + 1,
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
    * Mengecek apakah teks mengandung setidaknya satu pola
    * @param text Teks yang akan dicari
    * @returns Boolean apakah pola ditemukan

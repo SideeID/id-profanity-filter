@@ -26,7 +26,7 @@ console.log('Hasil filter kustom:', filter.filter(teks1).filtered);
 console.log('\n=== Menggabungkan Daftar Kata ===\n');
 
 // Reset filter ke pengaturan default
-filter.setOptions({});
+filter.resetOptions();
 
 // Tambahkan kata-kata kustom tapi tetap deteksi kata-kata bawaan
 const teks2 = 'Film itu sangat jelek dan payah, dibuat oleh anjing amatir.';
@@ -38,7 +38,7 @@ const standarAnalisis = filter.analyze(teks2);
 console.log('- Kata terdeteksi:', standarAnalisis.matches);
 
 // Tambahkan kata kustom
-filter.setWordList([...customBadWords]);
+filter.setWordList([...customBadWords, 'anjing']);
 console.log('\nAnalisis dengan kata kustom ditambahkan:');
 const customAnalisis = filter.analyze(teks2);
 console.log('- Kata terdeteksi:', customAnalisis.matches);
@@ -47,7 +47,7 @@ console.log('- Kata terdeteksi:', customAnalisis.matches);
 console.log('\n=== Penggunaan Whitelist ===\n');
 
 // Kita ingin kata "anjing" diperbolehkan jika dalam konteks binatang
-filter.setOptions({});
+filter.resetOptions();
 filter.addToWhitelist('anjing');
 
 const teks3a = 'Anjing adalah hewan peliharaan yang setia.';

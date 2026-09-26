@@ -79,7 +79,7 @@ export const sexual: ProfanityWord[] = [
     category: 'sexual',
     region: 'general',
     severity: 0.9,
-    aliases: ['ngew', 'we'],
+    aliases: ['ngew'],
     description: 'Istilah kasar untuk aktivitas seksual',
     context: 'Kata vulgar yang merujuk pada aktivitas seksual',
   },
