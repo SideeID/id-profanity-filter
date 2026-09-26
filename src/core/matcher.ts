@@ -10,18 +10,23 @@ import {
 import { DEFAULT_OPTIONS } from '../config/options';
 import { AhoCorasick } from '../utils/ahoCorasick';
 
-const globalAhoCorasick = new AhoCorasick();
-let ahoCorasickInitialized = false;
+let defaultAhoCorasick: AhoCorasick | null = null;
 
-function initializeAhoCorasick(words: string[]) {
-  if (ahoCorasickInitialized) return;
-
-  for (const word of words) {
-    globalAhoCorasick.addPattern(word);
+function getDefaultAhoCorasick(): AhoCorasick {
+  if (!defaultAhoCorasick) {
+    const ac = new AhoCorasick();
+    for (const wordObj of wordObjects) {
+      ac.addPattern(wordObj.word);
+      if (wordObj.aliases) {
+        for (const alias of wordObj.aliases) {
+          ac.addPattern(alias);
+        }
+      }
+    }
+    ac.build();
+    defaultAhoCorasick = ac;
   }
-
-  globalAhoCorasick.build();
-  ahoCorasickInitialized = true;
+  return defaultAhoCorasick;
 }
 
 interface FindProfanityFunction {
@@ -54,13 +59,16 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
     maxLevenshteinDistance = 2,
   } = { ...DEFAULT_OPTIONS, ...options };
 
+  const hasCustomWordList = Boolean(wordList && wordList.length > 0);
   const normalizedWhitelist = whitelist.map((w) => w.toLowerCase());
-
   const normalizedText = normalizeText(text);
 
-  let baseWordsToCheck: string[] = wordList.length > 0 ? wordList : [];
+  let baseWordsToCheck: string[] = [];
+  const aliasMap = new Map<string, string>();
 
-  if (baseWordsToCheck.length === 0) {
+  if (hasCustomWordList) {
+    baseWordsToCheck = wordList;
+  } else {
     const filteredWords = wordObjects.filter((word) => {
       const matchCategory = categories ? categories.includes(word.category) : true;
       const matchRegion = regions ? regions.includes(word.region) : true;
@@ -69,26 +77,15 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
     });
 
     baseWordsToCheck = filteredWords.map((word) => word.word);
+
+    filteredWords.forEach((wordObj) => {
+      if (wordObj.aliases && wordObj.aliases.length > 0) {
+        wordObj.aliases.forEach((alias) => {
+          aliasMap.set(alias.toLowerCase(), wordObj.word.toLowerCase());
+        });
+      }
+    });
   }
-
-  const aliasMap = new Map<string, string>();
-  wordObjects.forEach((wordObj) => {
-    const matchCategory = categories ? categories.includes(wordObj.category) : true;
-    const matchRegion = regions ? regions.includes(wordObj.region) : true;
-    const matchSeverity = wordObj.severity >= severityThreshold;
-
-    if (
-      matchCategory &&
-      matchRegion &&
-      matchSeverity &&
-      wordObj.aliases &&
-      wordObj.aliases.length > 0
-    ) {
-      wordObj.aliases.forEach((alias) => {
-        aliasMap.set(alias.toLowerCase(), wordObj.word.toLowerCase());
-      });
-    }
-  });
 
   const wordsToCheck = [...baseWordsToCheck, ...Array.from(aliasMap.keys())].filter(
     (word) => !normalizedWhitelist.includes(word.toLowerCase())
@@ -103,6 +100,7 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 
   const passesFilters = (word: string): boolean => {
     if (normalizedWhitelist.includes(word.toLowerCase())) return false;
+    if (hasCustomWordList) return true;
 
     const metadata = getWordMetadata(word);
     if (!metadata) return false;
@@ -114,10 +112,29 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
     return matchCategory && matchRegion && matchSeverity;
   };
 
-  initializeAhoCorasick(wordsToCheck);
+  let ac: AhoCorasick;
+  if (hasCustomWordList) {
+    ac = new AhoCorasick();
+    for (const w of wordsToCheck) {
+      ac.addPattern(w);
+    }
+    ac.build();
+  } else {
+    ac = getDefaultAhoCorasick();
+  }
 
-  const basicMatches = globalAhoCorasick.searchUnique(normalizedText);
-  for (const match of basicMatches) {
+  const occurrences = ac.searchWithPositions(normalizedText);
+  for (const occ of occurrences) {
+    const { pattern: match, start, end } = occ;
+
+    if (!checkSubstring) {
+      const isWordStart = start === 0 || !/[a-z0-9_]/i.test(normalizedText[start - 1]);
+      const isWordEnd = end === normalizedText.length || !/[a-z0-9_]/i.test(normalizedText[end]);
+      if (!isWordStart || !isWordEnd) {
+        continue;
+      }
+    }
+
     if (normalizedWhitelist.includes(match.toLowerCase())) continue;
 
     const originalWord = aliasMap.get(match.toLowerCase()) || match.toLowerCase();
@@ -274,8 +291,8 @@ export function findProfanity(text: string, options: FilterOptions = {}): string
 /**
  * Mencari kata kotor lengkap dengan metadata
  *
- * @param text Teks yang akan diperika
- * @param options Opsi utnuk pencarian kata kotor
+ * @param text Teks yang akan diperiksa
+ * @param options Opsi untuk pencarian kata kotor
  * @return Array dari objek kata kotor yang ditemukan
  */
 export function findProfanityWithMetadata(
@@ -295,15 +312,24 @@ export function findProfanityWithMetadata(
           (obj.aliases && obj.aliases.some((alias) => alias.toLowerCase() === word.toLowerCase()))
       );
 
-      return wordObject;
+      if (wordObject) {
+        return wordObject;
+      }
+
+      return {
+        word,
+        category: 'profanity' as ProfanityCategory,
+        region: 'general' as Region,
+        severity: 0.5,
+      };
     })
     .filter((word): word is ProfanityWord => word !== undefined);
 }
 
 /**
- * Mencari kategory kata kotor yang ada dalam teks
+ * Mencari kategori kata kotor yang ada dalam teks
  *
- * @param matchDetails Hasil pencarian dari fingProfanityWithMetadata()
+ * @param matchDetails Hasil pencarian dari findProfanityWithMetadata()
  * @return Array kategori unik
  */
 export function findCategories(matchDetails: ProfanityWord[]): ProfanityCategory[] {
@@ -319,7 +345,7 @@ export function findCategories(matchDetails: ProfanityWord[]): ProfanityCategory
 /**
  * Mencari region kata kotor yang ada dalam teks
  *
- * @param matchDetails Hasil pencarian dari fingProfanityWithMetadata()
+ * @param matchDetails Hasil pencarian dari findProfanityWithMetadata()
  * @return Array region unik
  */
 export function findRegions(matchDetails: ProfanityWord[]): Region[] {
@@ -343,7 +369,7 @@ export function calculateSeverity(matchDetails: ProfanityWord[]): number {
     return 0;
   }
 
-  const countFactor = Math.min(matchDetails.length / 10, 1); // Maksimal 10 kata
+  const countFactor = Math.min(matchDetails.length / 10, 1);
 
   const categoryWeights: Record<ProfanityCategory, number> = {
     sexual: 0.9,

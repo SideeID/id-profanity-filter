@@ -96,6 +96,14 @@ export class IDProfanityFilter {
   }
 
   /**
+   * Mengatur ulang opsi filter ke default
+   * @param options Opsi baru untuk override default
+   */
+  resetOptions(options: FilterOptions = {}) {
+    this.options = { ...DEFAULT_OPTIONS, ...options };
+  }
+
+  /**
    * Menggunakan preset yang telah ditentukan
    * @param presetName Nama preset yang akan digunakan
    * @param additionalOptions Opsi tambahan untuk override

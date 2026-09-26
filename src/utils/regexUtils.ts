@@ -164,8 +164,7 @@ export function addIndonesianVariations(pattern: string): string {
     const variations = variationMap[lowerChar];
 
     if (variations && variations.length > 1) {
-      // Create a character class with all variations
-      result += `[${variations.join('')}]`;
+      result += `(?:${variations.join('|')})`;
     } else {
       result += char;
     }

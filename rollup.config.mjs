@@ -3,7 +3,11 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json';
 import dts from 'rollup-plugin-dts';
-import pkg from './package.json' assert { type: 'json' };
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf-8')
+);
 
 export default [
   {

@@ -17,6 +17,7 @@ interface FindProfanityFunction {
  * @returns FilterResult dengan hasil filter
  */
 export function filter(text: string, options: FilterOptions = {}): FilterResult {
+  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
   const {
     replaceWith = '*',
     fullWordCensor = true,
@@ -25,31 +26,10 @@ export function filter(text: string, options: FilterOptions = {}): FilterResult 
     checkSubstring = false,
     useRandomGrawlix = false,
     keepFirstAndLast = false,
-    indonesianVariation = false,
     detectSplit = false,
-    detectSimilarity = false,
-    useLevenshtein = false,
-    maxLevenshteinDistance = 2,
-    similarityThreshold = 0.8,
-  } = { ...DEFAULT_OPTIONS, ...options };
+  } = mergedOptions;
 
-  const matches = findProfanity(text, {
-    ...options,
-    detectLeetSpeak,
-    whitelist,
-    checkSubstring,
-    indonesianVariation,
-    detectSplit,
-    detectSimilarity,
-    useLevenshtein,
-    maxLevenshteinDistance,
-    similarityThreshold,
-  });
-
-  const actualMatches: Map<string, string[]> =
-    (findProfanity as FindProfanityFunction).lastActualMatches || new Map();
-
-  const matchDetails = findProfanityWithMetadata(text, options);
+  const matches = findProfanity(text, mergedOptions);
 
   if (matches.length === 0) {
     return {
@@ -59,15 +39,42 @@ export function filter(text: string, options: FilterOptions = {}): FilterResult 
     };
   }
 
-  let filteredText = text;
+  const actualMatches: Map<string, string[]> =
+    (findProfanity as FindProfanityFunction).lastActualMatches || new Map();
+  const matchDetails = findProfanityWithMetadata(text, mergedOptions);
+  const normalizedWhitelist = whitelist.map((w) => w.toLowerCase());
 
+  let filteredText = text;
   const replacements: Array<{
     original: string;
     censored: string;
     metadata?: ProfanityWord;
   }> = [];
 
-  matches.forEach((word) => {
+  const getCensoredWord = (originalWord: string): string => {
+    if (useRandomGrawlix) {
+      return makeRandomGrawlixString(originalWord.length);
+    }
+    return censorWord(originalWord, replaceWith, !fullWordCensor && keepFirstAndLast);
+  };
+
+  const applyReplacement = (pattern: RegExp, metadata?: ProfanityWord) => {
+    filteredText = filteredText.replace(pattern, (matchedStr) => {
+      if (normalizedWhitelist.includes(matchedStr.toLowerCase())) {
+        return matchedStr;
+      }
+
+      const censored = getCensoredWord(matchedStr);
+      replacements.push({
+        original: matchedStr,
+        censored,
+        metadata,
+      });
+      return censored;
+    });
+  };
+
+  for (const word of matches) {
     const metadata = matchDetails.find(
       (m) =>
         m.word.toLowerCase() === word.toLowerCase() ||
@@ -75,163 +82,36 @@ export function filter(text: string, options: FilterOptions = {}): FilterResult 
     );
 
     const variants = actualMatches.get(word.toLowerCase()) || [];
-    variants.push(word);
+    const allVariants = [...new Set([...variants, word])].sort((a, b) => b.length - a.length);
 
-    const uniqueVariants = [...new Set(variants)];
-
-    uniqueVariants.forEach((variant) => {
-      const regex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, 'gi');
-
-      let match;
-      while ((match = regex.exec(filteredText)) !== null) {
-        const originalWord = match[0];
-
-        if (whitelist.includes(originalWord.toLowerCase())) continue;
-
-        let censoredWord;
-        if (useRandomGrawlix) {
-          censoredWord = makeRandomGrawlixString(originalWord.length);
-        } else {
-          censoredWord = censorWord(originalWord, replaceWith, !fullWordCensor && keepFirstAndLast);
-        }
-
-        replacements.push({
-          original: originalWord,
-          censored: censoredWord,
-          metadata,
-        });
-
-        filteredText = filteredText.replace(
-          new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, 'g'),
-          censoredWord
-        );
-      }
-    });
-
-    if (detectSplit || detectLeetSpeak) {
-      if (detectLeetSpeak) {
-        const leetRegex = createWordRegex(word, {
-          wholeWord: true,
-          caseSensitive: false,
-          leetSpeak: true,
-          detectSplit: false,
-          indonesianVariation: false,
-        });
-
-        let match;
-        while ((match = leetRegex.exec(filteredText)) !== null) {
-          const originalWord = match[0];
-
-          if (whitelist.includes(originalWord.toLowerCase())) continue;
-
-          let censoredWord;
-          if (useRandomGrawlix) {
-            censoredWord = makeRandomGrawlixString(originalWord.length);
-          } else {
-            censoredWord = censorWord(
-              originalWord,
-              replaceWith,
-              !fullWordCensor && keepFirstAndLast
-            );
-          }
-
-          replacements.push({
-            original: originalWord,
-            censored: censoredWord,
-            metadata,
-          });
-
-          filteredText = filteredText.replace(
-            new RegExp(escapeRegExp(originalWord), 'g'),
-            censoredWord
-          );
-        }
-      }
-
-      if (detectSplit) {
-        const splitRegex = createWordRegex(word, {
-          wholeWord: false,
-          caseSensitive: false,
-          leetSpeak: false,
-          detectSplit: true,
-          indonesianVariation: false,
-        });
-
-        let match;
-        while ((match = splitRegex.exec(filteredText)) !== null) {
-          const originalWord = match[0];
-
-          if (whitelist.includes(originalWord.toLowerCase())) continue;
-
-          let censoredWord;
-          if (useRandomGrawlix) {
-            censoredWord = makeRandomGrawlixString(originalWord.length);
-          } else {
-            censoredWord = censorWord(
-              originalWord,
-              replaceWith,
-              !fullWordCensor && keepFirstAndLast
-            );
-          }
-
-          replacements.push({
-            original: originalWord,
-            censored: censoredWord,
-            metadata,
-          });
-
-          filteredText = filteredText.replace(
-            new RegExp(escapeRegExp(originalWord), 'g'),
-            censoredWord
-          );
-        }
-      }
+    for (const variant of allVariants) {
+      const boundaryPattern = checkSubstring
+        ? escapeRegExp(variant)
+        : `\\b${escapeRegExp(variant)}\\b`;
+      applyReplacement(new RegExp(boundaryPattern, 'gi'), metadata);
     }
-  });
 
-  if (detectSimilarity && useLevenshtein) {
-    matches.forEach((word) => {
-      const metadata = matchDetails.find(
-        (m) =>
-          m.word.toLowerCase() === word.toLowerCase() ||
-          (m.aliases && m.aliases.some((alias) => alias.toLowerCase() === word.toLowerCase()))
-      );
-
-      const variants = actualMatches.get(word.toLowerCase()) || [];
-
-      variants.forEach((variant) => {
-        const exactVariantRegex = new RegExp(`\\b${escapeRegExp(variant)}\\b`, 'gi');
-
-        let match;
-        while ((match = exactVariantRegex.exec(filteredText)) !== null) {
-          const originalWord = match[0];
-
-          if (whitelist.includes(originalWord.toLowerCase())) continue;
-
-          let censoredWord;
-          if (useRandomGrawlix) {
-            censoredWord = makeRandomGrawlixString(originalWord.length);
-          } else {
-            censoredWord = censorWord(
-              originalWord,
-              replaceWith,
-              !fullWordCensor && keepFirstAndLast
-            );
-          }
-
-          replacements.push({
-            original: originalWord,
-            censored: censoredWord,
-            metadata,
-          });
-
-          filteredText = filteredText.replace(
-            new RegExp(`\\b${escapeRegExp(originalWord)}\\b`, 'g'),
-            censoredWord
-          );
-        }
+    if (detectLeetSpeak) {
+      const leetRegex = createWordRegex(word, {
+        wholeWord: !checkSubstring,
+        caseSensitive: false,
+        leetSpeak: true,
+        detectSplit: false,
+        indonesianVariation: false,
       });
-    });
+      applyReplacement(leetRegex, metadata);
+    }
+
+    if (detectSplit) {
+      const splitRegex = createWordRegex(word, {
+        wholeWord: false,
+        caseSensitive: false,
+        leetSpeak: false,
+        detectSplit: true,
+        indonesianVariation: false,
+      });
+      applyReplacement(splitRegex, metadata);
+    }
   }
 
   return {

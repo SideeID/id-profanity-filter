@@ -16,17 +16,7 @@ export type Region =
   | 'minang'
   | 'bali'
   | 'madura'
-  | 'bugis'
-  | 'aceh'
-  | 'ambon'
-  | 'papua'
-  | 'manado'
-  | 'banjar'
-  | 'palembang'
-  | 'lampung'
-  | 'ntt'
-  | 'mandailing'
-  | 'ntb';
+  | 'aceh';
 
 export interface ProfanityWord {
   word: string;
