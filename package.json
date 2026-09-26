@@ -12,6 +12,9 @@
       "require": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rollup -c",
     "test": "jest",
